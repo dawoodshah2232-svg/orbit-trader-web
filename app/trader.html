@@ -1125,47 +1125,6 @@ html[dir="rtl"] #tabbar .tab svg{transform:scaleX(-1)}
  #print-area th,#print-area td{border:1px solid #999;padding:5px 7px;text-align:left}
  #print-area h1{font-size:18px}#print-area h2{font-size:13px;margin:14px 0 6px}
 }
-/* ================= DESKTOP TERMINAL — full PC view (mobile app UI stays as-is below 1024px) ================= */
-@media (min-width:1024px){
-  .stage-note{display:none}
-  .phone{
-    width:100%;height:100vh;max-width:none;border-radius:0;border:none;box-shadow:none;
-    display:grid;gap:1px;background:var(--border);
-    grid-template-columns:312px minmax(0,1fr);
-    grid-template-rows:minmax(0,1fr) 254px;
-    grid-template-areas:"watchlist chart" "watchlist positions";
-  }
-  .phone>.screen{min-height:0;min-width:0;border-radius:0}
-  /* three live panels, always visible on PC */
-  #scr-quotes{grid-area:watchlist;display:flex !important;background:var(--bg)}
-  #scr-chart{grid-area:chart;display:flex !important;background:var(--bg)}
-  #scr-trade{grid-area:positions;display:flex !important;background:var(--bg)}
-  #tabbar{display:none !important}
-  /* roomier panel headers on PC */
-  #scr-quotes .rx-qhead,#scr-chart .rx-chead,#scr-trade .appbar{min-height:58px;padding-left:16px;padding-right:12px}
-  #scr-chart .rx-tfrow{padding:8px 16px}
-  #scr-chart .rx-meta{padding:6px 16px 2px}
-  #chartwrap{min-height:0}
-  /* chart-screen trade ticket: compact row under the chart */
-  #scr-chart .rx-cpane{border-top:1px solid var(--border)}
-  #scr-chart .rx-ctabs{display:none}
-  #scr-chart #cx-pending,#scr-chart #cx-alerts{display:none !important}
-  /* secondary screens become floating panels over the terminal */
-  #scr-history.on,#scr-more.on,#scr-messages.on,#scr-account.on{
-    display:flex;position:fixed;z-index:120;inset:30px;margin:auto;max-width:1060px;
-    background:var(--bg);border:1px solid var(--border2);border-radius:18px;
-    box-shadow:0 32px 90px rgba(0,0,0,.55);overflow:hidden;
-  }
-  /* bottom sheets become centered dialogs on PC */
-  #sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(640px,93vw);max-height:88vh;
-    border:1px solid var(--border2);border-radius:20px;
-    transform:translate(-50%,-47%) scale(.98);opacity:0;
-    transition:transform .3s cubic-bezier(.32,.72,.35,1),opacity .22s ease}
-  #sheet.show{transform:translate(-50%,-50%) scale(1);opacity:1}
-  #drawer{top:14px;bottom:14px;border-radius:0 18px 18px 0}
-  #toast{left:50%;right:auto;width:min(500px,90vw);transform:translate(-50%,14px)}
-  #datawin{position:fixed}
-}
 </style>
 <style>
 /* ================= BATCH 2: advanced trading / account / strategy / notifications ================= */
@@ -1435,6 +1394,48 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
 /* chart timeframe row: scrollable pills must never slide under the tool icons */
 .rx-tfrow .tf-row{flex:1 1 auto;min-width:0}
 .rx-tfrow .rx-tftools,.rx-tfrow .dtool{flex:none}
+
+/* ================= DESKTOP TERMINAL — full PC view (mobile app UI stays as-is below 1024px) ================= */
+@media (min-width:1024px){
+  .stage-note{display:none}
+  .phone{
+    width:100%;height:100vh;max-width:none;border-radius:0;border:none;box-shadow:none;
+    display:grid;gap:1px;background:var(--border);
+    grid-template-columns:312px minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr) 254px;
+    grid-template-areas:"watchlist chart" "watchlist positions";
+  }
+  .phone>.screen{min-height:0;min-width:0;border-radius:0}
+  /* three live panels, always visible on PC */
+  #scr-quotes{grid-area:watchlist;display:flex !important;background:var(--bg)}
+  #scr-chart{grid-area:chart;display:flex !important;background:var(--bg)}
+  #scr-trade{grid-area:positions;display:flex !important;background:var(--bg)}
+  #tabbar{display:none !important}
+  /* roomier panel headers on PC */
+  #scr-quotes .rx-qhead,#scr-chart .rx-chead,#scr-trade .appbar{min-height:58px;padding-left:16px;padding-right:12px}
+  #scr-chart .rx-tfrow{padding:8px 16px}
+  #scr-chart .rx-meta{padding:6px 16px 2px}
+  #chartwrap{min-height:0}
+  /* chart-screen trade ticket: compact row under the chart */
+  #scr-chart .rx-cpane{border-top:1px solid var(--border)}
+  #scr-chart .rx-ctabs{display:none}
+  #scr-chart #cx-pending,#scr-chart #cx-alerts{display:none !important}
+  /* secondary screens become floating panels over the terminal */
+  #scr-history.on,#scr-more.on,#scr-messages.on,#scr-account.on{
+    display:flex;position:fixed;z-index:120;inset:30px;margin:auto;max-width:1060px;
+    background:var(--bg);border:1px solid var(--border2);border-radius:18px;
+    box-shadow:0 32px 90px rgba(0,0,0,.55);overflow:hidden;
+  }
+  /* bottom sheets become centered dialogs on PC */
+  #sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(640px,93vw);max-height:88vh;
+    border:1px solid var(--border2);border-radius:20px;
+    transform:translate(-50%,-47%) scale(.98);opacity:0;
+    transition:transform .3s cubic-bezier(.32,.72,.35,1),opacity .22s ease}
+  #sheet.show{transform:translate(-50%,-50%) scale(1);opacity:1}
+  #drawer{top:14px;bottom:14px;border-radius:0 18px 18px 0}
+  #toast{left:50%;right:auto;width:min(500px,90vw);transform:translate(-50%,14px)}
+  #datawin{position:fixed}
+}
 </style>
 </head>
 <body>
