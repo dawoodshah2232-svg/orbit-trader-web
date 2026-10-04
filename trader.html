@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>OrbitTrader 5.2</title>
+<title>OrbitTrader 5.8</title>
 <style>
 /* ============ THEME TOKENS — every color flows through these ============ */
 :root, [data-theme="dark"]{
@@ -1125,6 +1125,47 @@ html[dir="rtl"] #tabbar .tab svg{transform:scaleX(-1)}
  #print-area th,#print-area td{border:1px solid #999;padding:5px 7px;text-align:left}
  #print-area h1{font-size:18px}#print-area h2{font-size:13px;margin:14px 0 6px}
 }
+/* ================= DESKTOP TERMINAL — full PC view (mobile app UI stays as-is below 1024px) ================= */
+@media (min-width:1024px){
+  .stage-note{display:none}
+  .phone{
+    width:100%;height:100vh;max-width:none;border-radius:0;border:none;box-shadow:none;
+    display:grid;gap:1px;background:var(--border);
+    grid-template-columns:312px minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr) 254px;
+    grid-template-areas:"watchlist chart" "watchlist positions";
+  }
+  .phone>.screen{min-height:0;min-width:0;border-radius:0}
+  /* three live panels, always visible on PC */
+  #scr-quotes{grid-area:watchlist;display:flex !important;background:var(--bg)}
+  #scr-chart{grid-area:chart;display:flex !important;background:var(--bg)}
+  #scr-trade{grid-area:positions;display:flex !important;background:var(--bg)}
+  #tabbar{display:none !important}
+  /* roomier panel headers on PC */
+  #scr-quotes .rx-qhead,#scr-chart .rx-chead,#scr-trade .appbar{min-height:58px;padding-left:16px;padding-right:12px}
+  #scr-chart .rx-tfrow{padding:8px 16px}
+  #scr-chart .rx-meta{padding:6px 16px 2px}
+  #chartwrap{min-height:0}
+  /* chart-screen trade ticket: compact row under the chart */
+  #scr-chart .rx-cpane{border-top:1px solid var(--border)}
+  #scr-chart .rx-ctabs{display:none}
+  #scr-chart #cx-pending,#scr-chart #cx-alerts{display:none !important}
+  /* secondary screens become floating panels over the terminal */
+  #scr-history.on,#scr-more.on,#scr-messages.on,#scr-account.on{
+    display:flex;position:fixed;z-index:120;inset:30px;margin:auto;max-width:1060px;
+    background:var(--bg);border:1px solid var(--border2);border-radius:18px;
+    box-shadow:0 32px 90px rgba(0,0,0,.55);overflow:hidden;
+  }
+  /* bottom sheets become centered dialogs on PC */
+  #sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(640px,93vw);max-height:88vh;
+    border:1px solid var(--border2);border-radius:20px;
+    transform:translate(-50%,-47%) scale(.98);opacity:0;
+    transition:transform .3s cubic-bezier(.32,.72,.35,1),opacity .22s ease}
+  #sheet.show{transform:translate(-50%,-50%) scale(1);opacity:1}
+  #drawer{top:14px;bottom:14px;border-radius:0 18px 18px 0}
+  #toast{left:50%;right:auto;width:min(500px,90vw);transform:translate(-50%,14px)}
+  #datawin{position:fixed}
+}
 </style>
 <style>
 /* ================= BATCH 2: advanced trading / account / strategy / notifications ================= */
@@ -1397,20 +1438,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
 </style>
 </head>
 <body>
-<div class="stage-note"><b>OrbitTrader 5.2</b> · live market data · paper trading</div>
+<div class="stage-note"><b>OrbitTrader 5.8</b> · live market data · paper trading</div>
 <div class="phone" id="phone">
   <div id="inv-banner">View-only investor mode — trading disabled</div>
 
   <div id="splash">
     <svg class="mark" viewBox="0 0 512 512"><defs><radialGradient id="PLG1" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RG1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FC1"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLG1)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FC1)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg>
-    <div class="word">Orbit<span>Trader 5.2</span></div>
+    <div class="word">Orbit<span>Trader 5.8</span></div>
     <div class="tagline">Trade the universe.</div>
     <div class="load"><i></i></div>
   </div>
 
   <div id="login">
     <svg class="mark" viewBox="0 0 512 512"><defs><radialGradient id="PLG2" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RG2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FC2"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG2)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLG2)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FC2)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG2)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg>
-    <div class="word">Orbit<span>Trader 5.2</span></div>
+    <div class="word">Orbit<span>Trader 5.8</span></div>
     <div class="ltag">Demo terminal · real market prices<br>paper trading — no real money</div>
     <div class="copybox" onclick="copyCreds()" title="Tap to copy">
       <div>Login ID&nbsp;&nbsp;<b>253705371</b></div>
@@ -1431,7 +1472,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
   <div class="screen on" id="scr-quotes">
     <header class="appbar rx-qhead">
       <button class="iconbtn" onclick="drawer(true)" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <div class="rx-brand"><svg viewBox="0 0 512 512"><defs><radialGradient id="PLG1" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RG1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FC1"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLG1)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FC1)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg><b>Orbit<span>Trader 5.2</span></b></div>
+      <div class="rx-brand"><svg viewBox="0 0 512 512"><defs><radialGradient id="PLG1" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RG1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FC1"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLG1)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FC1)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg><b>Orbit<span>Trader 5.8</span></b></div>
       <span id="srv-clock" class="num" title="Server time (UTC)">--:--:--</span>
       <span id="feed-pill" class="feed-pill" title="Feed status"><i></i><b>LIVE</b></span>
       <button class="iconbtn" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
@@ -1745,7 +1786,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
   <div id="drawer">
     <div class="d-head">
       <svg class="mark" viewBox="0 0 512 512"><defs><radialGradient id="PLG3" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RG3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FC3"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG3)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLG3)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FC3)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG3)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg>
-      <div><div class="dn">Orbit<span>Trader 5.2</span></div><div class="ds num" id="drawer-acct">253705371 · Demo</div></div>
+      <div><div class="dn">Orbit<span>Trader 5.8</span></div><div class="ds num" id="drawer-acct">253705371 · Demo</div></div>
     </div>
     <div class="scroll" id="drawer-items"></div>
   </div>
@@ -1765,7 +1806,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
   <div class="screen" id="scr-account">
     <header class="appbar">
       <button class="iconbtn" onclick="drawer(true)" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <div class="rx-brand" style="flex:1;display:flex;align-items:center;gap:9px;font-size:17px;font-weight:800;letter-spacing:-.015em"><svg viewBox="0 0 512 512"><defs><radialGradient id="PLG1" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RG1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FC1"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLG1)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FC1)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg><b>Orbit<span style="color:var(--buy)">Trader 5.2</span></b></div>
+      <div class="rx-brand" style="flex:1;display:flex;align-items:center;gap:9px;font-size:17px;font-weight:800;letter-spacing:-.015em"><svg viewBox="0 0 512 512"><defs><radialGradient id="PLG1" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RG1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FC1"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLG1)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FC1)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RG1)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg><b>Orbit<span style="color:var(--buy)">Trader 5.8</span></b></div>
       <button class="iconbtn" onclick="nav('messages',document.querySelectorAll('#tabbar .tab')[4])" aria-label="Mailbox" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span class="rx-nbadge" id="acct-mail-n" style="position:absolute;top:2px;right:2px"></span></button>
     </header>
     <div class="scroll">
@@ -3766,7 +3807,7 @@ function sheetStatement(){const ds=S.deals||[];
 function printStatement(){const ds=[...(S.deals||[])].reverse();
  const rows=ds.map(d=>{const dg=SPECS[d.sym]?SPECS[d.sym].digits:2;
   return `<tr><td>${fmtTime(d.time)}</td><td>${DISP(d.sym)}</td><td>${d.dir.toUpperCase()}</td><td>${d.vol}</td><td>${Number(d.open).toFixed(dg)}</td><td>${Number(d.close).toFixed(dg)}</td><td>${d.pl>=0?"+":"\u2212"}${Math.abs(d.pl).toFixed(2)}</td><td>${esc(dealReason(d.reason))}</td></tr>`;}).join("");
- $("print-area").innerHTML=`<h1>OrbitTrader 5.2 \u2014 Account Statement</h1>
+ $("print-area").innerHTML=`<h1>OrbitTrader 5.8 \u2014 Account Statement</h1>
  <p>Account ${S.acctId} \u00B7 ${esc(S.acctLabel||"")} \u00B7 generated ${new Date().toLocaleString()} \u00B7 paper trading, no real money</p>
  <h2>Summary</h2><p>Closed deals: ${ds.length} \u00B7 Net P/L: $${ds.reduce((a,d)=>a+d.pl,0).toFixed(2)} \u00B7 Balance: $${S.balance.toFixed(2)}</p>
  <h2>Closed deals</h2><table><tr><th>Close time</th><th>Symbol</th><th>Dir</th><th>Lots</th><th>Open</th><th>Close</th><th>P/L $</th><th>Reason</th></tr>${rows||'<tr><td colspan="8">No deals yet</td></tr>'}</table>`;
@@ -3928,7 +3969,7 @@ function sheetAbout(){sheetOpen("Data sources & disclosures",`
  <div class="kv"><span class="k">XAUUSD · XAGUSD</span><span class="v" style="font-size:13px">Swissquote spot<br><small>live bank quotes, never a proxy</small></span></div>
  <div class="kv"><span class="k">Execution</span><span class="v" style="font-size:13px">Paper trading<br><small>no real money moves</small></span></div>
  <div class="kv"><span class="k">Charting</span><span class="v" style="font-size:13px">Charting by <a href="https://www.tradingview.com/" target="_blank" rel="noopener" style="color:var(--buy)">TradingView</a><br><small>Lightweight Charts&trade;</small></span></div>
- <p style="color:var(--text3);font-size:12.5px;margin-top:14px;line-height:1.7">OrbitTrader 5.2 v2.0 demo. Prices are real market data with honest LIVE / DAILY / CLOSED / OFFLINE badges — never simulated. Trading is simulated paper trading for evaluation only. Not investment advice.</p>`);}
+ <p style="color:var(--text3);font-size:12.5px;margin-top:14px;line-height:1.7">OrbitTrader 5.8 v2.0 demo. Prices are real market data with honest LIVE / DAILY / CLOSED / OFFLINE badges — never simulated. Trading is simulated paper trading for evaluation only. Not investment advice.</p>`);}
 
 
 /* ================= BATCH 3 — final polish ================= */
