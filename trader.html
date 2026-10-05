@@ -42,6 +42,9 @@ button{font-family:inherit}
 @media(max-width:480px){.stage-note{display:none}body{align-items:stretch}}
 .phone{width:390px;height:min(844px,100vh);background:var(--bg);border-radius:44px;border:1px solid var(--border2);overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:background .25s}
 @media(max-width:1023.98px){.phone{width:100%;height:100vh;height:100dvh;max-width:none;border-radius:0;border:none;box-shadow:none}body{align-items:stretch;justify-content:flex-start}.stage-note{display:none}}
+/* horizontal lock: phones scroll vertically only */
+html,body{overflow-x:hidden;overscroll-behavior-x:none}
+@media(max-width:1023.98px){.phone{touch-action:pan-y}.screen,#sheet-body,#drawer{overflow-x:hidden}}
 /* ============ SPLASH / LOGIN ============ */
 #splash{position:absolute;inset:0;z-index:200;background:radial-gradient(120% 90% at 50% 20%,#0A1428 0%,#000 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
 [data-theme="light"] #splash{background:radial-gradient(120% 90% at 50% 20%,#dbe7ff 0%,#f2f2f7 60%)}
@@ -2010,7 +2013,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
       <div class="mrow" onclick="sheetCalendar()"><span class="mico mi-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="mtit"><b>Economic calendar</b><small>This week · ForexFactory</small></span><span class="mchev">›</span></div>
       <div class="msec">Market</div>
       <div class="mrow" onclick="sheetSessions()"><span class="mico mi-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="mtit"><b>Symbol sessions &amp; specs</b><small>Trading hours · contract sizes</small></span><span class="mchev">›</span></div>
-      <div class="mrow" onclick="sheetFeedStatus()"><span class="mico mi-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span><span class="mtit"><b>Feed status</b><small id="feed-summary">—</small></span><span class="mchev">›</span></div>
       <div class="msec">Appearance</div>
       <div class="mrow"><span class="mico mi-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></span><span class="mtit"><b>Theme</b><small>Dark or light interface</small></span><span class="seg2"><button id="th-dark" onclick="setTheme('dark')">Dark</button><button id="th-light" onclick="setTheme('light')">Light</button>
             <button id="th-ctr" onclick="setTheme('ctrader')">cTrader</button></span></div>
@@ -2029,7 +2031,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
           <div class="mrow" onclick="sheetClose();b2_tour(true)"><span class="mico mi-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.8.33-.9 1-.9 1.67"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg></span><span class="mtit"><b>Take the tour</b><small>Replay the guided tour</small></span><span class="mchev">›</span></div>
           <div class="mrow" onclick="sheetClose();b2_ntfCenter()"><span class="mico mi-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><span class="mtit"><b>Notifications</b><small>Center &amp; alert preferences</small></span><span class="mchev">›</span></div>
           <div class="msec">App</div>
-      <div class="mrow" onclick="sheetAbout()"><span class="mico mi-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span><span class="mtit"><b>Data sources &amp; disclosures</b><small>Where prices come from</small></span><span class="mchev">›</span></div>
       <div class="mrow"><span class="mico mi-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span><span class="mtit"><b>Version</b><small>6.0 · paper trading</small></span></div>
       <div style="height:30px"></div>
     </div>
@@ -2583,7 +2584,7 @@ function nav(name,el){buzz(8);S.tab=name;document.querySelectorAll(".screen").fo
 function fitOrient(){try{document.body.classList.toggle("land-chart",S.tab==="chart"&&window.matchMedia&&window.matchMedia("(orientation: landscape)").matches);}catch(e){}}
 window.addEventListener("resize",()=>{fitOrient();fitDesk();});
 window.addEventListener("orientationchange",()=>{setTimeout(fitOrient,300);});
-/* swipe left/right on screen content to switch tabs, with slide animation */
+/* swipe left/right tab navigation DISABLED 2026-10-05: horizontal lock — phones scroll vertically only
 (function(){const order=["quotes","chart","trade","history","messages"];
  const phone=$("phone");let sx=null,sy=null,st=null;
  phone.addEventListener("touchstart",e=>{if(e.touches.length!==1){sx=null;return;}
@@ -2606,6 +2607,7 @@ window.addEventListener("orientationchange",()=>{setTimeout(fitOrient,300);});
    to.style.transform="translateX(0)";to.style.opacity="1";
    setTimeout(()=>{to.style.transition="";to.style.transform="";to.style.opacity="";},300);}));}
 })();
+*/
 function drawer(open){$("drawer").classList.toggle("on",open);$("drawer-scrim").classList.toggle("on",open);if(open)renderDrawer();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("drawer").classList.contains("on"))drawer(false);else if($("sheet").classList.contains("open"))sheetClose();}});
 const DRAWER=[["Quotes",'<path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>',"quotes"],
@@ -2621,9 +2623,7 @@ const DRAWER=[["Quotes",'<path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-
  ["Portfolio",'<path d="M21.2 15.9A10 10 0 118 2.8"/><path d="M22 12A10 10 0 0012 2v10z"/>',"portfolio"],
  ["Strategy tester",'<path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4"/>',"tester"],
  ["Settings & more",'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',"settings"],
- ["Toggle theme",'<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',"theme"],
- ["Feed status",'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',"feed"],
- ["Data sources",'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',"about"]];
+ ["Toggle theme",'<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',"theme"]];
 /* ================= DUAL UI MODES · 2026-10-05 ================= */
 function setUiMode(m,quiet){S.uiMode=(m==="classic")?"classic":"advanced";save();applyUiMode();
  if(!quiet)toast(S.uiMode==="classic"?"Classic interface":"Advanced interface");
@@ -2647,8 +2647,7 @@ var DRAWER_C=[
  ["Economic calendar",'<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',"calendar"],
  ["Traders Community",'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',"signals"],
  ["Algo Trading",'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v2m6-2v2M9 20v2m6-2v2M2 9h2m-2 6h2M20 9h2m-2 6h2M9 12h6"/>',"algo"],
- ["User guide",'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3m.1 4h.01"/>',"guide"],
- ["About",'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/>',"about"]];
+ ["User guide",'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3m.1 4h.01"/>',"guide"]];
 function renderDrawer(){const an=S.alerts.filter(a=>!a.fired).length,mn=unreadMail();
  $("drawer-items").innerHTML=DRAWER.map(d=>{let bdg="";
   if(d[2]==="alerts"&&an)bdg=`<span class="nbadge">${an}</span>`;
