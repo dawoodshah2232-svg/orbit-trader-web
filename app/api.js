@@ -17,8 +17,9 @@
 (function (global) {
   "use strict";
 
-  var LS_CFG = "orbit-api-config";   // {baseUrl, key}
-  var LS_TOK = "orbit-api-token";    // {token, kind, label}
+  var LS_CFG = "orbit-api-config";   // {baseUrl} — URL is not a secret, may persist
+  var LS_TOK = "orbit-api-token";    // legacy: session tokens are memory-only since P0
+  var LS_KEY = "orbit-api-key";     // legacy: API keys are memory-only since P0
   var LS_Q   = "orbit-api-queue";    // [{id, method, path, body, ts}]
   var LS_OUT = "orbit-api-outcomes"; // [{id, method, path, outcome, reason, ts}] — explicit dead-letter log
   var QUEUE_CAP = 200;
@@ -34,8 +35,37 @@
   }
   function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
-  var cfg = lsGet(LS_CFG, { baseUrl: "", key: "" });
-  var sess = lsGet(LS_TOK, null);
+  /* P0 secrets hygiene: API keys and session tokens live in memory only, never in
+   * browser storage (XSS-readable). One-time migration wipes any pre-P0 values. */
+  var _migrated = (function () {
+    var wiped = [];
+    try {
+      var raw = localStorage.getItem(LS_CFG);
+      if (raw) {
+        try {
+          var parsed = JSON.parse(raw);
+          if (parsed.key) {
+            wiped.push('api-key');
+            // rewrite the persisted config without the secret
+            localStorage.setItem(LS_CFG, JSON.stringify({ baseUrl: parsed.baseUrl || '' }));
+          }
+        } catch (e) {}
+      }
+      ['orbit-api-token', 'orbit-api-key'].forEach(function (k) {
+        if (localStorage.getItem(k) || sessionStorage.getItem(k)) wiped.push(k);
+      });
+      localStorage.removeItem(LS_TOK); sessionStorage.removeItem(LS_TOK);
+      localStorage.removeItem(LS_KEY); sessionStorage.removeItem(LS_KEY);
+    } catch (e) {}
+    if (wiped.length && typeof console !== 'undefined' && console.info)
+      console.info('[OrbitAPI] P0: cleared stored secrets (' + wiped.join(', ') +
+                   ') — re-enter per session.');
+    return true;
+  })();
+
+  var _savedCfg = lsGet(LS_CFG, {});
+  var cfg = { baseUrl: String((_savedCfg && _savedCfg.baseUrl) || ''), key: '' };
+  var sess = null;
 
   var state = {
     mode: cfg.baseUrl ? "unknown" : "unconfigured", // unconfigured|unknown|online|offline
@@ -117,7 +147,7 @@
         if (canQueue) { enqueue(method, path, body); return { ok: true, queued: true }; }
       } else if (err.status === 401) {
         // Credential rejected — drop the bad token, keep the API key.
-        if (sess) { sess = null; lsDel(LS_TOK); }
+        if (sess) { sess = null; }
       }
       throw err;
     });
@@ -223,14 +253,14 @@
       var keepKey = (typeof o.key === "undefined");
       cfg = { baseUrl: String(o.baseUrl || "").trim(),
               key: keepKey ? (cfg.key || "") : String(o.key || "").trim() };
-      lsSet(LS_CFG, cfg);
+      lsSet(LS_CFG, { baseUrl: cfg.baseUrl }); /* P0: key stays memory-only */
       setState({ mode: cfg.baseUrl ? "unknown" : "unconfigured",
                  latencyMs: null, version: null, lastError: "" });
       return API.check();
     },
     config: function () { return { baseUrl: cfg.baseUrl, hasKey: !!cfg.key }; },
     clearConfig: function () {
-      cfg = { baseUrl: "", key: "" }; lsDel(LS_CFG);
+      cfg = { baseUrl: "", key: "" }; lsSet(LS_CFG, { baseUrl: "" });
       setState({ mode: "unconfigured", latencyMs: null, version: null });
     },
 
@@ -239,8 +269,7 @@
         .then(function (d) {
           if (d.kind !== "admin") throw new Error("Not an admin account");
           sess = { token: d.token, kind: "admin", label: d.username, role: d.role };
-          lsSet(LS_TOK, sess);
-          return d;
+          return d; /* P0: session token memory-only */
         });
     },
     loginTrader: function (login, password) {
@@ -248,12 +277,11 @@
         .then(function (d) {
           if (d.kind !== "trader") throw new Error("Not a trader account");
           sess = { token: d.token, kind: "trader", label: String(login) };
-          lsSet(LS_TOK, sess);
-          return d;
+          return d; /* P0: session token memory-only */
         });
     },
     session: function () { return sess ? { kind: sess.kind, label: sess.label, role: sess.role } : null; },
-    logout: function () { sess = null; lsDel(LS_TOK); },
+    logout: function () { sess = null; },
 
     check: checkConnection,
     status: function () {

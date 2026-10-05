@@ -5,9 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f2f7">
-<title>OrbitTrader 6.0 — Manager Terminal</title>
+<title>OrbitTrader 6.1 — Manager Terminal</title>
 <script src="feed.js"></script>
 <script src="api.js"></script>
+<script src="shared/specs-loader.js"></script>
+<script src="shared/trade-lifecycle.js"></script>
+<script src="shared/execution.js"></script>
+<script src="shared/positions.js"></script>
+<script src="shared/margin-engine.js"></script>
+<script src="shared/money-math.js"></script>
+<script src="shared/dealing-desk.js"></script>
+<script src="shared/coverage.js"></script>
+<script src="shared/corporate-actions.js"></script>
+<script src="shared/automations.js"></script>
+<script src="shared/payments.js"></script>
+<script src="shared/liquidity.js"></script>
+<script src="shared/subscriptions.js"></script>
+<script src="shared/terminal-services.js"></script>
+<script src="shared/config-portability.js"></script>
+<script src="shared/reports.js"></script>
+<script src="shared/crm.js"></script>
+<script src="shared/mailbox.js"></script>
+<script src="shared/accounts.js"></script>
 <style>
 /* ============ THEMES (CSS custom properties only) ============ */
 :root,[data-theme="dark"]{
@@ -175,6 +194,10 @@ select.abtn,select.asel{appearance:none;-webkit-appearance:none}
 /* entry */
 #entry{position:absolute;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text);padding:32px;text-align:center}
 #entry.hide{display:none}
+.einput{width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:13px 16px;color:var(--text);font-size:15px;font-family:var(--font)}
+.einput:focus{outline:none;border-color:var(--buy)}
+#demobar{display:none;position:sticky;top:0;z-index:60;background:#3a2b00;color:#ffd75e;font-size:12px;font-weight:800;letter-spacing:.08em;text-align:center;padding:8px 12px}
+#demobar.show{display:block}
 .ebadge{width:76px;height:76px;border-radius:38px;background:var(--green-dim);color:var(--green);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
 .ecred{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:13px 18px;font-size:15px;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--font)}
 .ecred:active{background:var(--bg3)}
@@ -459,6 +482,78 @@ select.abtn,select.asel{appearance:none;-webkit-appearance:none}
 .empty{padding:48px 24px}
 .stat4 .cell{background:var(--surface);border-radius:14px;padding:12px 10px}
 .stat4 .v{font-variant-numeric:tabular-nums;font-weight:800;font-size:15px}
+/* v6.1 manager waves — own OrbitTrader components, apple-design motion */
+.st-DEMO{color:var(--blue);background:var(--blue-dim)}
+.kvt{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:13px}
+.kvt .k{color:var(--text3);font-weight:600;white-space:nowrap}
+.kvt .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
+.dtable th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:8px 10px;border-bottom:1px solid var(--border)}
+.dtable td{padding:9px 10px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.dtable tr:last-child td{border-bottom:none}
+.dtable td.n,.dtable th.n{text-align:right}
+.chip{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:3px 9px;border-radius:8px;white-space:nowrap}
+.chip.buy{color:var(--buy);background:var(--buy-dim)}
+.chip.sell{color:var(--sell);background:var(--sell-dim)}
+.chip.ok{color:var(--green);background:var(--green-dim)}
+.chip.warn{color:var(--gold);background:var(--gold-dim)}
+.chip.bad{color:var(--red);background:var(--red-dim)}
+.chip.info{color:var(--blue);background:var(--blue-dim)}
+.chip.dim{color:var(--text2);background:var(--inbg)}
+.deprow{display:flex;align-items:center;gap:0;margin:10px 0}
+.deprow .q{flex:1;text-align:center;font-weight:800;font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:9px 4px}
+.deprow .q small{display:block;font-weight:600;font-size:10px;color:var(--text3);margin-top:2px}
+.deprow .arw{flex:none;color:var(--text3);font-size:16px;padding:0 5px}
+.depthgrid{display:grid;grid-template-columns:1fr 1fr;gap:0;font-size:12px}
+.depthgrid .dh{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:8px 10px}
+.depline{position:relative;padding:7px 10px;display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;overflow:hidden}
+.depline i{position:absolute;top:0;bottom:0;right:0;background:var(--sell-dim);opacity:.55;pointer-events:none}
+.depline.b i{left:0;right:auto;background:var(--buy-dim)}
+.depline span{position:relative;z-index:1}
+.acc{border:1px solid var(--border);border-radius:14px;background:var(--bg2);margin:0 16px 10px;overflow:hidden}
+.acc>button{width:100%;background:none;border:none;color:var(--text);text-align:left;padding:14px 16px;font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:var(--font)}
+.acc>button .chev{margin-left:auto;color:var(--text3);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.acc.open>button .chev{transform:rotate(90deg)}
+.acc .abody{display:none;padding:0 16px 16px;font-size:13px;color:var(--text2);line-height:1.65}
+.acc.open .abody{display:block}
+.seg{display:flex;gap:8px;margin:12px 16px 4px;flex-wrap:wrap}
+.mrow2{display:flex;gap:8px;margin:12px 16px}
+.mrow2>button{flex:1}
+textarea.ainput{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:11px 14px;color:var(--text);font-size:14px;font-family:var(--font);min-height:74px;resize:vertical}
+.switch{width:46px;height:28px;border-radius:14px;background:var(--inbg);border:1px solid var(--border);position:relative;cursor:pointer;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:left .2s cubic-bezier(.22,1,.36,1)}
+.switch.on::after{left:20px}
+.switch.on{background:var(--buy)}
+/* press feedback — pointer-down response on every control (apple-design) */
+.mtab:active,.rbtn:active,.mbtn:active,.ebtn:active,.abtn:active,.crow:active,.acc>button:active,.switch:active{transform:scale(.93)}
+.mtab,.rbtn,.mbtn,.ebtn,.abtn,.acc>button{transition:transform .1s ease-out}
+@media(prefers-reduced-motion:reduce){.mtab,.rbtn,.mbtn,.ebtn,.abtn,.acc>button,.switch{transition:none}}
+@media(min-width:1024px){.dtable{font-size:13.5px}.acc,.card{max-width:860px}}
+/* ============ DUAL UI MODES ============ */
+/* classic: dense traditional manager chrome */
+[data-mode="classic"] .card,[data-mode="classic"] .kpi{border-radius:8px;padding:10px 12px}
+[data-mode="classic"] .kpis{gap:8px;padding:10px 12px}
+[data-mode="classic"] .mtab{font-size:11px;padding:10px 10px 8px;text-transform:uppercase;letter-spacing:.05em}
+[data-mode="classic"] .sec{padding:12px 14px 6px;font-size:11px}
+[data-mode="classic"] .crow{padding:8px 12px}
+[data-mode="classic"] .dtable td{padding:6px 8px;font-size:12px}
+[data-mode="classic"] .acc{border-radius:8px}
+[data-mode="classic"] .adv-only{display:none!important}
+:root[data-mode="advanced"] .classic-only{display:none!important}
+/* advanced: flagship materials */
+[data-mode="advanced"] .card{box-shadow:0 8px 28px rgba(0,0,0,.22)}
+[data-theme="light"][data-mode="advanced"] .card{box-shadow:0 8px 24px rgba(20,30,60,.10)}
+[data-mode="advanced"] .mtab.on::after{height:3px;border-radius:2px;background:linear-gradient(90deg,var(--buy),#7AB8FF)}
+/* desktop shells */
+@media(min-width:1024px){
+  [data-mode="advanced"] .phone{width:min(1200px,96vw);height:min(940px,94vh);border-radius:26px}
+  [data-mode="advanced"] .kpis{grid-template-columns:repeat(4,1fr)}
+  [data-mode="advanced"] .adv-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;align-items:start}
+  [data-mode="advanced"] .adv-grid>.full{grid-column:1/-1}
+  [data-mode="advanced"] .adv-grid .card,[data-mode="advanced"] .adv-grid .acc{max-width:none}
+  [data-mode="classic"] .phone{width:min(1200px,96vw);height:min(940px,94vh);border-radius:12px}
+  [data-mode="classic"] .kpis{grid-template-columns:repeat(4,1fr)}
+}
 .exp-row .sb{font-variant-numeric:tabular-nums;font-weight:700}
 .audit .at{font-variant-numeric:tabular-nums}
 .ebtn{background:var(--buy);color:#fff;border-radius:14px;font-weight:800}
@@ -532,12 +627,13 @@ body{font-variant-numeric:tabular-nums}
 <body>
 <div class="phone">
   <header class="rx-top">
-    <div class="rx-brand"><svg viewBox="0 0 512 512"><defs><radialGradient id="PLGA" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RGA" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FCA"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RGA)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLGA)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FCA)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RGA)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg><b>Orbit<span>Trader 5.1</span></b></div>
+    <div class="rx-brand"><svg viewBox="0 0 512 512"><defs><radialGradient id="PLGA" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RGA" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FCA"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RGA)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLGA)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FCA)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RGA)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg><b>Orbit<span>Trader 6.1</span></b></div>
     <span class="rx-role mgr">MANAGER</span>
     <button class="iconbtn" id="themebtn" onclick="toggleTheme()" title="Theme"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
   </header>
   <div class="rx-status"><span class="dot" id="feeddot"></span><span id="feedtxt">Connecting feed…</span><span id="api-pill"></span></div>
   <div class="api-offbar" id="api-offbar">Server unreachable — working on local data. <b class="num" id="api-offbar-q">0</b> change(s) will sync on reconnect.</div>
+  <div id="demobar">LOCAL DEMO · no broker server — all data is on this device, server features unavailable</div>
   <div class="mtabs" id="mtabs">
     <button class="mtab on" data-t="overview">Overview</button>
     <button class="mtab" data-t="clients">Clients</button>
@@ -553,6 +649,14 @@ body{font-variant-numeric:tabular-nums}
     <button class="mtab" data-t="broadcast">Broadcast</button>
     <button class="mtab" data-t="ibs">IBs</button>
     <button class="mtab" data-t="settings">Settings</button>
+    <button class="mtab" data-t="accounts">Accounts</button>
+    <button class="mtab" data-t="market">Market</button>
+    <button class="mtab" data-t="corpops">Corp Ops</button>
+    <button class="mtab" data-t="cover">Coverage</button>
+    <button class="mtab" data-t="payments">Payments</button>
+    <button class="mtab" data-t="subs">Subscriptions</button>
+    <button class="mtab" data-t="system">System</button>
+    <button class="mtab" data-t="docs">Guide</button>
   </div>
 
   <!-- OVERVIEW -->
@@ -753,9 +857,9 @@ body{font-variant-numeric:tabular-nums}
     <div style="background:var(--bg2);margin:0 16px;border:1px solid var(--border);border-radius:14px;overflow:hidden">
       <div class="arow"><div>Theme<div class="d">Light and dark, everywhere</div></div><div class="spacer"></div><button class="abtn" style="padding:9px 18px" id="theme-label" onclick="toggleTheme()">Light</button></div>
     </div>
-    <div class="sec">Entry</div>
+    <div class="sec">Session</div>
     <div style="background:var(--bg2);margin:0 16px;border:1px solid var(--border);border-radius:14px;overflow:hidden">
-      <div class="arow"><div>Demo access<div class="d">No password — one tap to enter</div></div><div class="spacer"></div><span class="tag okk">Open</span></div>
+      <div class="arow"><div>Signed in as<div class="d" id="m-sess-sub">—</div></div><div class="spacer"></div><button class="rbtn no" style="flex:none;padding:7px 14px" onclick="mSignOut()">Sign out</button></div>
     </div>
     <div class="sec">Broker server · API connection</div>
     <div class="card" style="font-size:14px">
@@ -765,7 +869,7 @@ body{font-variant-numeric:tabular-nums}
       <div style="margin-top:10px">
         <div style="font-size:12.5px;color:var(--text2);font-weight:600;margin-bottom:6px">Server URL</div>
         <input id="m-api-url" placeholder="https://api.yourdomain.com" autocomplete="off" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;color:var(--text);font-size:15px;margin-bottom:10px">
-        <div style="font-size:12.5px;color:var(--text2);font-weight:600;margin-bottom:6px">API key <span style="font-weight:400;color:var(--text3)">· stored in this browser only</span></div>
+        <div style="font-size:12.5px;color:var(--text2);font-weight:600;margin-bottom:6px">API key <span style="font-weight:400;color:var(--text3)">· memory only — re-enter each session</span></div>
         <div class="secf"><input id="m-api-key" type="password" placeholder="otk_…" autocomplete="off" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:12px 46px 12px 14px;color:var(--text);font-size:15px"><button type="button" class="eye" onclick="secEye('m-api-key')" aria-label="Show secret" title="Show secret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line class="sl" x1="4" y1="4" x2="20" y2="20"/></svg></button></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:12px">
@@ -783,6 +887,71 @@ body{font-variant-numeric:tabular-nums}
     <div style="padding:0 16px 26px"><button class="abtn full" style="width:100%;color:var(--red)" onclick="resetDemo()">Reset demo data</button></div>
   </div></div>
 
+  <!-- accounts -->
+  <div class="screen" id="s-accounts"><div class="scroll">
+    <div class="rx-ttabs" id="acct-tabs">
+      <button data-k="list" class="on">Accounts</button><button data-k="new">New</button>
+      <button data-k="import">CSV import</button><button data-k="prelim">Preliminary</button>
+    </div>
+    <div id="acct-body" style="padding-bottom:24px"></div>
+  </div></div>
+  <!-- market -->
+  <div class="screen" id="s-market"><div class="scroll">
+    <div class="rx-ttabs" id="mkt-tabs">
+      <button data-k="watch" class="on">Watch</button><button data-k="depth">Depth</button>
+      <button data-k="cal">Calendar</button><button data-k="alerts">Alerts</button>
+    </div>
+    <div id="mkt-body" style="padding-bottom:24px"></div>
+  </div></div>
+  <!-- corpops -->
+  <div class="screen" id="s-corpops"><div class="scroll">
+    <div class="rx-ttabs" id="corp-tabs">
+      <button data-k="bulkclose" class="on">Bulk close</button><button data-k="bulkbal">Bulk balance</button>
+      <button data-k="bulkpay">Dividends/Tax</button><button data-k="splits">Splits</button>
+    </div>
+    <div id="corp-body" style="padding-bottom:24px"></div>
+  </div></div>
+  <!-- cover -->
+  <div class="screen" id="s-cover"><div class="scroll">
+    <div class="rx-ttabs" id="cov-tabs">
+      <button data-k="summary" class="on">Summary</button><button data-k="setup">Coverage</button>
+      <button data-k="routing">LP routing</button><button data-k="stopout">Stop-out</button>
+    </div>
+    <div id="cov-body" style="padding-bottom:24px"></div>
+  </div></div>
+  <!-- payments -->
+  <div class="screen" id="s-payments"><div class="scroll">
+    <div class="rx-ttabs" id="pay-tabs">
+      <button data-k="queue" class="on">Queue</button><button data-k="rules">Rules</button>
+      <button data-k="providers">Providers</button>
+    </div>
+    <div id="pay-body" style="padding-bottom:24px"></div>
+  </div></div>
+  <!-- subs -->
+  <div class="screen" id="s-subs"><div class="scroll">
+    <div class="rx-ttabs" id="sub-tabs">
+      <button data-k="products" class="on">Products</button><button data-k="assign">Client subs</button>
+    </div>
+    <div id="sub-body" style="padding-bottom:24px"></div>
+  </div></div>
+  <!-- system -->
+  <div class="screen" id="s-system"><div class="scroll">
+    <div class="rx-ttabs" id="sys-tabs">
+      <button data-k="security" class="on">Security</button><button data-k="dealer">Dealer auto</button>
+      <button data-k="risk">Groups</button><button data-k="plugins">Plugins</button>
+      <button data-k="journal">Journal</button><button data-k="port">Portability</button>
+    </div>
+    <div id="sys-body" style="padding-bottom:24px"></div>
+  </div></div>
+  <!-- docs -->
+  <div class="screen" id="s-docs"><div class="scroll">
+    <div class="rx-ttabs" id="doc-tabs">
+      <button data-k="lifecycle" class="on">Lifecycle</button><button data-k="margin">Margin calc</button>
+      <button data-k="orders">Orders &amp; fills</button>
+    </div>
+    <div id="doc-body" style="padding-bottom:24px"></div>
+  </div></div>
+
   <!-- client sheet -->
   <div id="sheet">
     <div class="appbar">
@@ -798,10 +967,24 @@ body{font-variant-numeric:tabular-nums}
   <div id="entry">
     <div class="ebadge"><svg viewBox="0 0 512 512"><defs><radialGradient id="PLGA" cx="0.35" cy="0.3" r="0.95"><stop offset="0" stop-color="#9CC6FF"/><stop offset="0.45" stop-color="#3E8BFF"/><stop offset="1" stop-color="#0C46B8"/></radialGradient><linearGradient id="RGA" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6FA5FF"/><stop offset="0.55" stop-color="#2F80FF" stop-opacity=".7"/><stop offset="1" stop-color="#2F80FF" stop-opacity=".2"/></linearGradient><clipPath id="FCA"><rect x="-40" y="244" width="592" height="308" transform="rotate(-18 256 256)"/></clipPath></defs><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RGA)" stroke-width="26" transform="rotate(-18 256 256)"/><circle cx="256" cy="256" r="112" fill="url(#PLGA)"/><ellipse cx="216" cy="206" rx="46" ry="30" fill="#FFFFFF" opacity="0.3" transform="rotate(-24 216 206)"/><g clip-path="url(#FCA)"><ellipse cx="256" cy="256" rx="214" ry="72" fill="none" stroke="url(#RGA)" stroke-width="26" transform="rotate(-18 256 256)"/></g></svg></div>
     <div style="font-size:22px;font-weight:800">Manager Terminal</div>
-    <div style="font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--green)">DEMO ACCESS · NO PASSWORD</div>
-    <button class="ecred" id="entry-id">Manager ID: <span class="num">DM-001</span> · tap to copy</button>
-    <button class="ebtn" id="entry-go">Enter terminal →</button>
-    <div style="font-size:12px;color:var(--text3)">Demo · paper trading — no real money</div>
+    <div style="font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--text2)">BROKER SIGN-IN REQUIRED</div>
+    <div id="entry-login" style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;margin-top:6px">
+      <input class="einput" id="entry-url" placeholder="Broker server URL · https://…" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <input class="einput" id="entry-user" placeholder="Username" autocomplete="username" autocapitalize="off" spellcheck="false">
+      <input class="einput" id="entry-pass" type="password" placeholder="Password" autocomplete="current-password">
+      <div id="entry-err" style="display:none;font-size:13px;color:var(--red);font-weight:600;line-height:1.4"></div>
+      <button class="ebtn" id="entry-go">Sign in</button>
+      <button class="ecred" id="entry-demo" style="color:var(--text2)">Local demo — no server, demo data only</button>
+    </div>
+    <div id="entry-chpw" style="display:none;width:100%;max-width:340px;flex-direction:column;gap:10px;margin-top:6px">
+      <div style="font-size:13.5px;color:var(--text2);line-height:1.5">This account must set a new password before continuing.</div>
+      <input class="einput" id="entry-old" type="password" placeholder="Current password" autocomplete="current-password">
+      <input class="einput" id="entry-new1" type="password" placeholder="New password (min 8 chars)" autocomplete="new-password">
+      <input class="einput" id="entry-new2" type="password" placeholder="Confirm new password" autocomplete="new-password">
+      <div id="entry-chpw-err" style="display:none;font-size:13px;color:var(--red);font-weight:600;line-height:1.4"></div>
+      <button class="ebtn" id="entry-chpw-go">Set password &amp; sign in</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">Dealing accounts need the <b>dealer</b> role · sessions expire after 12 hours</div>
   </div>
 
   <div id="toast"></div>
@@ -857,16 +1040,9 @@ function applyBrand(){BRANDX=readBrand();
 const LSKEY="orbit-mgr-v2";
 const REF={XAUUSDc:4275,BTCUSDc:84400,ETHUSDc:2695,SOLUSDc:121,BNBUSDc:772,XRPUSDc:1.52,EURUSDc:1.1392,GBPUSDc:1.3240,USDJPYc:157.40};
 /* Canonical symbol spec — MUST match trader.html exactly */
-const SPECS={
- BTCUSDc:{digits:2,contract:1,pipSize:1,pipValue:1,volMin:0.01,volMax:10,volStep:0.01,session:"24/7",stops:500,swapL:-45,swapS:-45},
- ETHUSDc:{digits:2,contract:1,pipSize:1,pipValue:1,volMin:0.01,volMax:50,volStep:0.01,session:"24/7",stops:100,swapL:-8,swapS:-8},
- SOLUSDc:{digits:2,contract:1,pipSize:1,pipValue:1,volMin:0.01,volMax:500,volStep:0.01,session:"24/7",stops:100,swapL:-2.5,swapS:-2.5},
- BNBUSDc:{digits:2,contract:1,pipSize:1,pipValue:1,volMin:0.01,volMax:500,volStep:0.01,session:"24/7",stops:100,swapL:-3,swapS:-3},
- XRPUSDc:{digits:4,contract:1,pipSize:0.01,pipValue:0.10,volMin:0.01,volMax:5000,volStep:0.01,session:"24/7",stops:100,swapL:-1.2,swapS:-1.2},
- XAUUSDc:{digits:2,contract:100,pipSize:0.10,pipValue:10,volMin:0.01,volMax:50,volStep:0.01,session:"24/5",stops:30,swapL:-28.5,swapS:-18.2},
- EURUSDc:{digits:5,contract:100000,pipSize:0.0001,pipValue:10,volMin:0.01,volMax:100,volStep:0.01,session:"24/5",stops:20,swapL:-5.2,swapS:-3.8},
- GBPUSDc:{digits:5,contract:100000,pipSize:0.0001,pipValue:10,volMin:0.01,volMax:100,volStep:0.01,session:"24/5",stops:20,swapL:-5.4,swapS:-3.6},
- USDJPYc:{digits:3,contract:100000,pipSize:0.01,pipValue:10,volMin:0.01,volMax:100,volStep:0.01,session:"24/5",stops:20,swapL:-3.1,swapS:-5.6}};
+/* QuotesWare P0: canonical specs from shared/specs-loader.js (single source of truth).
+   Legacy aliases (volMin/stops/swapL/...) are provided by the loader. */
+const SPECS=(window.SPECS||{});
 const SYM_ORDER=["XAUUSDc","BTCUSDc","ETHUSDc","SOLUSDc","BNBUSDc","XRPUSDc","EURUSDc","GBPUSDc","USDJPYc"];
 function adminSym(sym){try{const a=JSON.parse(localStorage.getItem("oa2-syms")||"[]");return Array.isArray(a)?a.find(y=>y.sym===sym):null;}catch(e){return null;}}
 function getSpec(sym){const b=Object.assign({},SPECS[sym]||{digits:2,contract:1,pipSize:0.01,pipValue:1,volMin:0.01,volMax:100,volStep:0.01,session:"24/5",stops:20,swapL:0,swapS:0});
@@ -962,7 +1138,7 @@ function marginLevel(c){const m=cMargin(c.login);if(m<=0)return null;return cEq(
 <script>
 "use strict";
 /* ================= navigation ================= */
-const TABS=["overview","clients","positions","risk","pending","dealing","symbols","requests","reports","alerts","broadcast","ibs","settings"];
+const TABS=["overview","clients","positions","risk","pending","dealing","symbols","requests","reports","alerts","broadcast","ibs","settings","accounts","market","corpops","cover","payments","subs","system","docs"];
 function mnav(t){if(!TABS.includes(t))t="overview";
   TABS.forEach(x=>$("s-"+x).classList.toggle("on",x===t));
   document.querySelectorAll(".mtab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
@@ -970,7 +1146,10 @@ function mnav(t){if(!TABS.includes(t))t="overview";
   if(t==="overview")renderOverview();if(t==="clients")renderClients();if(t==="positions")renderMPos();
   if(t==="pending")renderPending();if(t==="symbols"){renderSymbols();mgrSymLoad();}
   if(t==="requests")renderReq();if(t==="reports")renderReports();if(t==="alerts")renderAlerts();if(t==="broadcast")renderBroadcast();if(t==="ibs")renderIB();if(t==="settings")renderSettings();
-  if(t==="risk")renderRisk();if(t==="dealing")renderDealing();}
+  if(t==="risk")renderRisk();if(t==="dealing")renderDealing();
+  if(t==="accounts")renderAccounts();if(t==="market")renderMarket();if(t==="corpops")renderCorpOps();
+  if(t==="cover")renderCover();if(t==="payments")renderPayments();if(t==="subs")renderSubs();
+  if(t==="system")renderSystem();if(t==="docs")renderDocs();}
 document.querySelectorAll(".mtab").forEach(b=>b.addEventListener("click",()=>mnav(b.dataset.t)));
 /* ================= overview ================= */
 function bookPL(){let t=0,ok=false;S.positions.forEach(p=>{const v=plOf(p);if(v!==null){t+=v;ok=true;}});return ok?t:null;}
@@ -1771,6 +1950,7 @@ function printClients(){const rows=S.clients.map(c=>{const ml=marginLevel(c);
 function onTick(){renderAll();}
 function renderAll(){const t=document.querySelector(".mtab.on");const cur=t?t.dataset.t:"overview";
   renderOverview();renderClients();renderMPos();renderRisk();renderPending();renderSymbols();renderReq();renderBroadcast();renderIB();renderReports();renderAlerts();updateBadges();renderDealing();
+  try{renderAccounts();renderMarket();renderCorpOps();renderCover();renderPayments();renderSubs();renderSystem();renderDocs();}catch(e){console.warn("[manager v6] tab render",e);}
   if(shLogin)drawClient();else if(shSym)drawSpec();
   const anyLive=OrbitFeed.symbols().some(s=>OrbitFeed.state(s)==="LIVE");
   $("feeddot").classList.toggle("bad",!anyLive);
@@ -1793,11 +1973,80 @@ function boot(){
   setInterval(()=>{try{if(OrbitFeed.symbols().length)renderAll();}catch(e){}},30000);
   window.addEventListener("hashchange",()=>{try{const hh=(location.hash||"").replace("#","");if(hh.startsWith("client-")){const l=+hh.slice(7);if(cli(l)&&shLogin!==l)openClient(l);}}catch(e){}});
 }
+/* P0: broker sign-in gate. Session token stays in memory only (OrbitAPI Sess),
+ * never in localStorage/sessionStorage. Manager identity = authenticated username. */
 function wireEntry(){
   applyBrand();
-  $("entry-go").addEventListener("click",()=>{$("entry").classList.add("hide");boot();});
-  $("entry-id").addEventListener("click",()=>{try{if(navigator.clipboard)navigator.clipboard.writeText("DM-001");}catch(e){}toast("Manager ID copied","DM-001");});
+  const $=function(id){return document.getElementById(id);};
+  try{ $("entry-url").value=localStorage.getItem("orbit-admin-url")||""; }catch(e){}
+  const showErr=function(m){const e=$("entry-err");e.style.display=m?"block":"none";e.textContent=m||"";};
+  const showChErr=function(m){const e=$("entry-chpw-err");e.style.display=m?"block":"none";e.textContent=m||"";};
+  const enterTerminal=function(){ $("entry").classList.add("hide"); boot(); refreshSessRow(); };
+  const doLogin=async function(){
+    showErr("");
+    const url=$("entry-url").value.trim().replace(/\/+$/,"");
+    const user=$("entry-user").value.trim();
+    const pass=$("entry-pass").value;
+    if(!url) return showErr("Enter the broker server URL.");
+    if(!user||!pass) return showErr("Enter your username and password.");
+    if(typeof OrbitAPI==="undefined") return showErr("API layer unavailable — reload the page.");
+    const btn=$("entry-go"); btn.disabled=true; btn.textContent="Signing in…";
+    try{
+      OrbitAPI.configure({baseUrl:url});
+      const d=await OrbitAPI.loginAdmin(user,pass);
+      if(d.role!=="superadmin"&&d.role!=="dealer")
+        throw new Error("This terminal needs a dealer account — '"+user+"' is '"+(d.role||"unknown")+"'.");
+      try{ localStorage.setItem("orbit-admin-url",url); }catch(e){}
+      MGR_SESS={username:d.username,role:d.role,url:url};
+      MGR_ID=d.username;
+      if(d.must_change_pw){
+        $("entry-login").style.display="none";
+        $("entry-chpw").style.display="flex";
+        $("entry-old").value=pass;
+        btn.disabled=false; btn.textContent="Sign in";
+        return;
+      }
+      enterTerminal();
+      toast("Signed in",d.username+" · "+d.role);
+    }catch(e){
+      try{ OrbitAPI.logout(); }catch(e2){}
+      showErr((e&&e.message)?e.message:"Sign-in failed");
+      btn.disabled=false; btn.textContent="Sign in";
+    }
+  };
+  $("entry-go").addEventListener("click",doLogin);
+  $("entry-pass").addEventListener("keydown",function(e){ if(e.key==="Enter") doLogin(); });
+  $("entry-chpw-go").addEventListener("click",async function(){
+    showChErr("");
+    const old=$("entry-old").value, n1=$("entry-new1").value, n2=$("entry-new2").value;
+    if(n1.length<8) return showChErr("New password must be at least 8 characters.");
+    if(n1!==n2) return showChErr("New passwords do not match.");
+    const btn=$("entry-chpw-go"); btn.disabled=true; btn.textContent="Updating…";
+    try{
+      await OrbitAPI.raw("/admin/change-password.php",
+        {old_password:old,new_password:n1},{baseUrl:MGR_SESS.url});
+      enterTerminal();
+      toast("Password updated","Signed in as "+MGR_SESS.username);
+    }catch(e){
+      showChErr((e&&e.message)?e.message:"Password change failed");
+      btn.disabled=false; btn.textContent="Set password & sign in";
+    }
+  });
+  $("entry-demo").addEventListener("click",function(){
+    /* Fenced local demo: persistent banner, no server identity, no server features. */
+    MGR_SESS={username:"LOCAL-DEMO",role:"demo",url:""};
+    MGR_ID="LOCAL-DEMO";
+    document.getElementById("demobar").classList.add("show");
+    enterTerminal();
+    toast("Local demo","No server — demo data only");
+  });
 }
+/* Session row on the More screen — kept in sync after sign-in. */
+function refreshSessRow(){
+  const sub=document.getElementById("m-sess-sub");
+  if(sub&&MGR_SESS) sub.textContent=MGR_SESS.username+" · "+MGR_SESS.role;
+}
+function mSignOut(){ try{ if(typeof OrbitAPI!=="undefined") OrbitAPI.logout(); }catch(e){} location.reload(); }
 document.readyState==="loading"?document.addEventListener("DOMContentLoaded",wireEntry):wireEntry();
 </script>
 <script>
@@ -1842,7 +2091,6 @@ document.readyState==="loading"?document.addEventListener("DOMContentLoaded",wir
 
   var c = OrbitAPI.config();
   $("m-api-url").value = c.baseUrl || "";
-  if (c.hasKey) $("m-api-key").placeholder = "key saved (hidden) — re-enter to change";
   OrbitAPI.bindPill($("api-pill"));
   OrbitAPI.onStatus(refresh);
   refresh();
@@ -1856,7 +2104,10 @@ document.readyState==="loading"?document.addEventListener("DOMContentLoaded",wir
    Dealer queue, force close with reason, group change with preview, client
    statements, exposure blotter + paper hedges, margin-call workflow.
    All paper/demo only — no real execution, no real money. */
-const MGR_ID="DM-001";
+/* P0: manager identity comes from the authenticated broker session — no more
+ * hardcoded demo identity. Memory-only; never written to browser storage. */
+let MGR_ID=null;
+let MGR_SESS=null;
 function nowHM(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
 function nextPosId(){return S.positions.reduce((m,p)=>Math.max(m,p.id||0),0)+1;}
 function openPaperPos(o){S.positions.push({id:nextPosId(),client:o.client,sym:o.sym,dir:o.dir,vol:o.vol,open:o.price,sl:null,tp:null,time:nowHM()});save();}
@@ -2256,5 +2507,1265 @@ function mcSimExec(login){closeSheet();setTimeout(()=>confirmStopout(login),350)
   MP.init=function(){_init();ensureHedgeAcct();try{save();}catch(e){}try{renderAll();}catch(e){}};
 }catch(e){}})();
 </script>
+<script>
+"use strict";
+/* ============ v6.1 MANAGER WAVES — engine wiring (Batch 7, manager scope) ============ */
+/* Dual UI modes: [data-mode] on <html>. "advanced" = OrbitTrader flagship;
+ * "classic" = dense traditional manager layout. Same DOM => full function
+ * parity in both modes; .adv-only extras render flagship-only panels.      */
+/* never clobber a field the manager is typing in during a feed-tick rerender */
+function focusIn(id){const el=document.getElementById(id);const a=document.activeElement;
+  return !!(el&&a&&el.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));}
+function uiMode(){try{const m=localStorage.getItem("orbit-mgr-ui-mode");if(m==="classic"||m==="advanced")return m;}catch(e){}
+  return "advanced";}
+function applyUiMode(m){document.documentElement.setAttribute("data-mode",m);
+  try{localStorage.setItem("orbit-mgr-ui-mode",m);}catch(e){}
+  const b=document.getElementById("modebtn");if(b){b.innerHTML=ic(m==="advanced"?"spark":"grid");b.title="UI mode: "+m+" — tap to switch";}
+  const l=document.getElementById("mode-label");if(l)l.textContent=m==="classic"?"Classic":"Advanced";}
+function toggleUiMode(){applyUiMode(uiMode()==="classic"?"advanced":"classic");
+  toast("UI mode: "+uiMode(),uiMode()==="advanced"?"OrbitTrader flagship layout":"Traditional dense layout");}
+/* Heroicons-style inline SVG set (hand-drawn, OrbitTrader iconography) */
+const ICONS={
+grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+spark:'<path d="M12 2l2.2 6.2L21 9l-5 4.2L17.5 20 12 16.4 6.5 20 8 13.2 3 9l6.8-.8z"/>',
+shield:'<path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9.5 12l2 2 3.5-4"/>',
+bolt:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>',
+bell:'<path d="M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10.3 21a2 2 0 003.4 0"/>',
+chart:'<path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-7"/>',
+cog:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.9 2.9l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.9-2.9l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.9-2.9l.1.1a1.7 1.7 0 001.9.3h0a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5h0a1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.9 2.9l-.1.1a1.7 1.7 0 00-.3 1.9v0a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
+doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
+users:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8"/>',
+key:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="M11 12l9-9M17 5l3 3M14 8l2.5 2.5"/>',
+server:'<rect x="2" y="3" width="20" height="7" rx="2"/><rect x="2" y="14" width="20" height="7" rx="2"/><path d="M6 6.5h.01M6 17.5h.01"/>',
+globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>',
+swap:'<path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>',
+x:'<path d="M18 6L6 18M6 6l12 12"/>',
+check:'<path d="M20 6L9 17l-5-5"/>',
+eye:'<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+trend:'<path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/>',
+chev:'<path d="M9 18l6-6-6-6"/>'};
+function ic(n,s){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:${s||18}px;height:${s||18}px;flex:none">${ICONS[n]||""}</svg>`;}
+/* ============ v6 state ============ */
+function seedEcon(){const t=Date.now(),d=864e5;
+  return[
+   {id:"e1",name:"US CPI m/m",country:"United States",currency:"USD",priority:"high",eventTime:t+0.4*d,forecast:0.2,actual:null},
+   {id:"e2",name:"ECB press conference",country:"Euro Area",currency:"EUR",priority:"high",eventTime:t+1.2*d,forecast:null,actual:null},
+   {id:"e3",name:"UK employment change",country:"United Kingdom",currency:"GBP",priority:"medium",eventTime:t+2.1*d,forecast:25,actual:null},
+   {id:"e4",name:"FOMC minutes",country:"United States",currency:"USD",priority:"high",eventTime:t+3.4*d,forecast:null,actual:null}];}
+function seedTemplates(){return[
+  {id:"t1",name:"Margin call warning",channel:"mail",subject:"Margin call — account #LOGIN#",body:"Dear trader,\n\nYour account #LOGIN# is at margin level #USER_MARGIN_LEVEL#%.\nBalance #USER_BALANCE# · Equity #USER_EQUITY# · Free margin #USER_MARGIN_FREE#\n\nPlease top up or reduce exposure.\n\n#DATETIME#"},
+  {id:"t2",name:"KYC approved",channel:"mail",subject:"Account verified",body:"Hello #LOGIN#,\n\nYour documents were approved on #DATE#. Happy trading."},
+  {id:"t3",name:"Promo push",channel:"push",subject:"",body:"Spreads tightened on XAUUSDc this week — trade now."}];}
+function seedJournal(){return[
+  {t:"09:12",comp:"trade",level:"info",msg:"Deal #88412 filled BUY 0.50 XAUUSDc @ 4271.40 (FOK)"},
+  {t:"09:04",comp:"margin",level:"warn",msg:"Account 700105 margin level 118% — approaching call level"},
+  {t:"08:55",comp:"server",level:"info",msg:"EOD rollover completed: swaps posted for 41 positions"},
+  {t:"08:31",comp:"auth",level:"info",msg:"Manager dm-02 connected (SSL cert)"},
+  {t:"08:02",comp:"feeds",level:"error",msg:"Feed relay gw-2 timeout — failed over to gw-1"}];}
+function seedAutoCfg(){const cfg={};
+  (OrbitAutomations.REQUEST_TYPES||[]).forEach(r=>{cfg[r.name]={auto:r.name==="order_pending"?false:true,maxVol:5,timeout:60};});
+  return cfg;}
+function seedGroupRisk(){const g={};(S.groups||[]).forEach(x=>{g[x.id]={spreadMarkup:0,commission:0,swap:true,swapFree:false};});return g;}
+function ensureV6(){
+  if(!S)return;
+  if(!S.acctX)S.acctX={}; if(!S.acctSeq)S.acctSeq=1;
+  if(!S.balanceOps)S.balanceOps=[];
+  if(!S._payS)S._payS=OrbitPayments.newStore();
+  if(!S.payRules)S.payRules=[{id:"r1",name:"Lock withdrawals over $10k",when:"withdrawal_over",value:10000,action:"lock",enabled:true}];
+  if(!S.providers)S.providers=[
+    {id:"card",name:"Card",kind:"card",enabled:true,auto:true},
+    {id:"ewallet",name:"E-wallet",kind:"ewallet",enabled:true,auto:true},
+    {id:"bank",name:"Bank transfer",kind:"bank",enabled:true,auto:false}];
+  if(!S.bookCfg)S.bookCfg={rules:[Object.assign(OrbitLiquidity.defaultBookRule(),{id:"br1",name:"Default B-Book",symbol_mask:"*",group_mask:"*",book:"b",coverage_pct:0,min_coverage_volume:0})]};
+  if(!S.routingCfg)S.routingCfg=OrbitLiquidity.defaultRoutingConfig();
+  if(!S.coverage)S.coverage=[]; if(!S.covSeq)S.covSeq=1;
+  if(!S.subs)S.subs={products:[
+    {id:"p1",name:"Level 1 quotes",level:"level1",price:15,currency:"USD",period_days:30,news:false,enabled:true},
+    {id:"p2",name:"Level 2 depth",level:"level2",price:49,currency:"USD",period_days:30,news:true,enabled:true}],
+    assign:[],seq:1};
+  if(!S.malerts)S.malerts=[];
+  if(!S.econ)S.econ=seedEcon();
+  if(!S.templates)S.templates=seedTemplates();
+  if(!S.mailLog)S.mailLog=[];
+  if(!S.plugins)S.plugins=[
+    {id:"plg-risk",name:"Risk guard",file:"risk-guard.dll",enabled:true,flags:"max-daily-loss"},
+    {id:"plg-finteza",name:"Finteza events",file:"finteza.dll",enabled:false,flags:""}];
+  if(!S.journal)S.journal=seedJournal();
+  if(!S.autoCfg)S.autoCfg=seedAutoCfg();
+  if(!S.groupRisk)S.groupRisk=seedGroupRisk();
+  if(!S.corpAudit)S.corpAudit=[];
+  if(!S.stopCfg)S.stopCfg={marginCall:120,stopOut:80,mode:"percent",mcEmail:true,autoStopout:true};
+  save();
+}
+(function(){const _boot=boot;boot=function(){try{ensureV6();}catch(e){console.warn("[v6] ensureV6",e);}_boot();};})();
+/* ============ ui-mode chrome ============ */
+function mountModeChrome(){
+  const tb=document.getElementById("themebtn");
+  if(tb&&!document.getElementById("modebtn")){
+    const b=document.createElement("button");b.className="iconbtn";b.id="modebtn";
+    b.title="Switch UI mode (Classic / Advanced)";b.setAttribute("aria-label","Switch UI mode");
+    b.onclick=function(){toggleUiMode();};
+    tb.parentNode.insertBefore(b,tb);}
+  applyUiMode(uiMode());
+  const card=document.querySelector("#s-settings .sec");
+  if(card&&!document.getElementById("mode-label")){
+    const box=card.nextElementSibling;
+    if(box){const r=document.createElement("div");r.className="arow";
+      r.innerHTML=`<div>UI mode<div class="d">Classic = traditional dense layout · Advanced = OrbitTrader flagship</div></div><div class="spacer"></div><button class="abtn" style="padding:9px 18px" id="mode-label" onclick="toggleUiMode()">Advanced</button>`;
+      box.prepend(r);applyUiMode(uiMode());}}
+}
+document.addEventListener("DOMContentLoaded",function(){try{mountModeChrome();}catch(e){console.warn("[v6] chrome",e);}});
+/* ============ accounts ============ */
+let acctTab="list",acctQ="";
+function ax(login){login=+login;if(!S.acctX[login])S.acctX[login]={type:"live",status:"active",toggles:{trade:true,algo:true,trailing:true,api:true,vps:false,subs:true},twofa:false,certs:[],history:[],corporate:null,created:Date.now()};
+  return S.acctX[login];}
+function axHist(login,action,detail){const a=ax(login);a.history.unshift({t:nowHM(),action,detail});if(a.history.length>120)a.history.length=120;}
+function renderAccounts(){
+  if(focusIn("acct-body"))return;
+  document.querySelectorAll("#acct-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===acctTab);b.onclick=()=>{acctTab=b.dataset.k;renderAccounts();};});
+  const el=$("acct-body");if(!el)return;
+  if(acctTab==="list")el.innerHTML=acctListHTML();
+  else if(acctTab==="new")el.innerHTML=acctNewHTML();
+  else if(acctTab==="import")el.innerHTML=acctImportHTML();
+  else el.innerHTML=acctPrelimHTML();
+}
+const ATYPE_CHIP={demo:"info",preliminary:"warn",live:"ok",manager:"buy",technical:"dim",disabled:"bad"};
+function acctListHTML(){
+  const q=acctQ.toLowerCase();
+  const list=S.clients.filter(c=>!q||String(c.login).includes(q)||c.name.toLowerCase().includes(q));
+  return `<div class="frow"><input class="search" id="acct-q" placeholder="Search login or name…" value="${esc(acctQ)}" oninput="acctQ=this.value;renderAccounts()"></div>
+  <div class="sec">Accounts <span class="r"><span class="fbadge st-DEMO">DEMO</span> ${list.length}</span></div>
+  <div class="adv-grid">${list.map(c=>{const a=ax(c.login);const ml=marginLevel(c);
+    return `<div class="card" style="cursor:pointer;margin-bottom:10px" onclick="acctDetail(${c.login})">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="av">${esc(ini(c.name||"?"))}</div>
+      <div><div class="cn num" style="font-size:15px;font-weight:700">${esc(c.name)} <span class="chip ${ATYPE_CHIP[a.type]||"dim"}">${esc(a.type.toUpperCase())}</span>${a.status!=="active"?` <span class="chip bad">${esc(a.status.toUpperCase())}</span>`:""}</div>
+      <div class="cl num" style="font-size:12px;color:var(--text3)">${c.login} · ${esc((grpDef(c.group)||{}).name||c.group)} · 1:${c.lev}</div></div>
+      <div style="margin-left:auto;text-align:right" class="num"><div style="font-weight:800">${money(cEq(c))}</div>
+      <div style="font-size:11.5px;color:var(--text3)">ML ${ml===null?"—":Math.round(ml)+"%"}</div></div></div></div>`;}).join("")||`<div class="card"><div class="empty">No accounts match.</div></div>`}</div>`;
+}
+function acctNewHTML(){
+  const types=(OrbitAccounts.ACCOUNT_TYPES||[]).map(t=>`<option value="${t}">${t}</option>`).join("");
+  const groups=(S.groups||[]).map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join("");
+  return `<div class="sec">Create account <span class="r"><span class="fbadge st-DEMO">DEMO</span></span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Full name</span><input class="ainput" id="na-name" placeholder="Jane Doe" style="grid-column:2">
+    <span class="k">Type</span><select class="asel" id="na-type" style="grid-column:2">${types}</select>
+    <span class="k">Group</span><select class="asel" id="na-group" style="grid-column:2">${groups}</select>
+    <span class="k">Currency</span><select class="asel" id="na-cur" style="grid-column:2"><option>USD</option><option>AED</option><option>EUR</option></select>
+    <span class="k">Leverage</span><select class="asel" id="na-lev" style="grid-column:2"><option>100</option><option>200</option><option>500</option><option>1000</option></select>
+    <span class="k">Opening balance</span><input class="ainput num" id="na-bal" type="number" value="0" style="grid-column:2">
+  </div>
+  <div class="mrow2" style="margin:14px 0 0"><button class="mbtn sec" onclick="acctTab='list';renderAccounts()">Cancel</button><button class="mbtn" onclick="acctCreate()">Create account</button></div></div>
+  <div class="card" style="font-size:12.5px;color:var(--text2);line-height:1.6">Account types follow the platform lifecycle: <b>demo</b> (practice), <b>preliminary</b> (zero-balance, KYC pending), <b>live</b> (real), <b>manager</b>, <b>technical</b>, <b>disabled</b>. New demo accounts are also written to this device's shared book so the Trader app sees them.</div>`;
+}
+function acctCreate(){
+  const name=($("na-name").value||"").trim();if(!name)return toast("Name required","Enter the account holder name");
+  const login=720000+(S.acctSeq++);
+  const c={login,name,group:$("na-group").value,balance:+$("na-bal").value||0,credit:0,lev:+$("na-lev").value||100,blocked:false,notes:"",tags:[],docs:{id:false,poa:false},ib:null,logins:seedLogins(login),paper:true};
+  S.clients.push(c);
+  const a=ax(login);a.type=$("na-type").value;a.status="active";
+  axHist(login,"Account created",`Type ${a.type} · ${c.group} · opening ${money(c.balance)}`);
+  try{const as=JSON.parse(localStorage.getItem("orbit-accts")||"[]");
+    as.push({id:login,label:name,balance:c.balance,positions:[],orders:[],deals:[],deposits:[]});
+    localStorage.setItem("orbit-accts",JSON.stringify(as));}catch(e){}
+  audit("manager","Account created",`${name} (${login}) · ${a.type}`);
+  save();acctTab="list";acctQ=String(login);renderAccounts();toast("Account created","Login "+login+" · demo");
+}
+function acctImportHTML(){
+  return `<div class="sec">CSV bulk import <span class="r"><span class="fbadge st-DEMO">DEMO</span></span></div>
+  <div class="card"><div style="font-size:12.5px;color:var(--text2);margin-bottom:8px;line-height:1.6">Columns: <span class="num">login,name,type,group,balance[,leverage]</span> — or legacy 4-column <span class="num">login,name,group,balance</span>.</div>
+  <textarea class="ainput num" id="csv-in" placeholder="720101,Jane Doe,live,std,2500,100&#10;720102,John Roe,demo,std,10000"></textarea>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="acctImportDo()">Import accounts</button></div>
+  <div id="csv-out" style="margin-top:10px"></div></div>`;
+}
+function acctImportDo(){
+  const rows=($("csv-in").value||"").split("\n").map(r=>r.trim()).filter(Boolean);
+  let ok=0;const errs=[];
+  rows.forEach((line,i)=>{
+    const cells=line.split(",").map(c=>c.trim());
+    const o=cells.length===4
+      ?{login:cells[0],name:cells[1],group:cells[2],balance:cells[3]}
+      :{login:cells[0],name:cells[1],type:cells[2],group:cells[3],balance:cells[4],leverage:cells[5]};
+    let r;try{r=OrbitAccounts.parseImportRow(o);}catch(e){r={account:null,errors:[e.message]};}
+    if(!r||r.errors.length){errs.push(`row ${i+1}: ${(r&&r.errors||["parse error"]).join("; ")}`);return;}
+    const a=r.account,login=+a.login;
+    if(cli(login)){errs.push(`row ${i+1}: login ${login} exists`);return;}
+    S.clients.push({login:login,name:a.name||("Imported "+login),group:a.group,balance:a.balance,credit:0,lev:a.leverage,blocked:false,notes:"",tags:[],docs:{id:false,poa:false},ib:null,logins:seedLogins(login),paper:true});
+    ax(login).type=a.type;axHist(login,"CSV import","Bulk import by manager");ok++;
+  });
+  save();
+  $("csv-out").innerHTML=`<div class="card" style="margin:0"><b class="num">${ok}</b> imported${errs.length?`<div style="color:var(--red);font-size:12.5px;margin-top:6px">${errs.map(esc).join("<br>")}</div>`:""}</div>`;
+  audit("manager","CSV import",`${ok} accounts imported, ${errs.length} errors`);toast("Import done",ok+" imported · "+errs.length+" errors");
+}
+function acctPrelimHTML(){
+  const list=S.clients.filter(c=>ax(c.login).type==="preliminary");
+  return `<div class="sec">Preliminary accounts <span class="r">KYC → move to live</span></div>
+  ${list.map(c=>{const a=ax(c.login);return `<div class="card"><div style="display:flex;align-items:center;gap:10px">
+    <div><b class="num">${c.login}</b> · ${esc(c.name)}<div style="font-size:12px;color:var(--text3)">Zero-balance · trading disabled · ${timeAgo(a.created)}</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px"><button class="rbtn" onclick="acctApprove(${c.login})">Approve → live</button><button class="rbtn no" onclick="acctDisable(${c.login})">Reject</button></div></div></div>`;}).join("")||`<div class="card"><div class="empty">No preliminary accounts pending.</div></div>`}`;
+}
+function acctApprove(login){const a=ax(login);a.type="live";a.status="active";axHist(login,"Moved to live","KYC approved by manager");audit("manager","Preliminary approved",String(login));save();renderAccounts();toast("Account live",login+" · demo");}
+function acctDisable(login){const a=ax(login);a.type="disabled";a.status="suspended";axHist(login,"Rejected","Preliminary application rejected");audit("manager","Account disabled",String(login));save();renderAccounts();toast("Account disabled",login);}
+/* ---- account detail (360 view) ---- */
+function acctDetail(login){
+  const c=cli(login);if(!c)return;const a=ax(login);
+  const pos=S.positions.filter(p=>p.client===login);
+  const wavg={};pos.forEach(p=>{const w=wavg[p.sym]||(wavg[p.sym]={buyV:0,buyS:0,sellV:0,sellS:0});if(p.dir==="buy"){w.buyV+=p.vol;w.buyS+=p.vol*p.open;}else{w.sellV+=p.vol;w.sellS+=p.vol*p.open;}});
+  const wrows=Object.keys(wavg).map(s=>{const w=wavg[s];return `<tr><td>${esc(dname(s))}</td><td class="n">${w.buyV?w.buyS/w.buyV:"—"}</td><td class="n">${w.sellV?w.sellS/w.sellV:"—"}</td><td class="n">${(w.buyV+w.sellV).toFixed(2)}</td></tr>`;}).join("");
+  const deals=(S.deals||[]).filter(d=>d.client===login);
+  const life=deals.reduce((t,d)=>t+(+d.pl||0),0);
+  const depNet=(c.depNet||0);
+  const tl=S.balanceOps.filter(b=>b.login===login).concat(deals.map(d=>({t:d.t,action:"Deal closed",detail:`${d.dir} ${d.vol} ${dname(d.sym)} · P/L ${sgn(+d.pl||0)}`})))
+    .concat(a.history.map(h=>({t:h.t,action:h.action,detail:h.detail}))).slice(0,25);
+  const kinds=Object.keys(OrbitAccounts.DEAL_KINDS||{}).map(k=>`<option value="${k}">${OrbitAccounts.DEAL_KINDS[k].label}</option>`).join("");
+  const tg=a.toggles;
+  const tgRow=(k,label)=>`<div class="arow"><div>${label}</div><div class="spacer"></div><button class="switch${tg[k]?" on":""}" onclick="acctToggle(${login},'${k}')" aria-label="${label}"></button></div>`;
+  openModal(`<h3 class="num">${esc(c.name)} <span class="chip ${ATYPE_CHIP[a.type]}">${esc(a.type.toUpperCase())}</span></h3>
+  <p style="color:var(--text2);font-size:13px">Login <b class="num">${login}</b> · ${esc((grpDef(c.group)||{}).name||c.group)} · 1:${c.lev} · <span class="fbadge st-DEMO">DEMO</span></p>
+  <div class="rx-ttabs" style="padding:10px 0 0"><button class="on" data-mk="ov">Overview</button><button data-mk="b360">360°</button><button data-mk="bal">Balance ops</button><button data-mk="sec">Security</button></div>
+  <div id="am-body" style="padding-top:6px"></div>
+  <div class="mrow"><button class="mbtn sec" onclick="closeModal()">Close</button></div>`);
+  document.querySelectorAll("[data-mk]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-mk]").forEach(x=>x.classList.remove("on"));b.classList.add("on");drawAcctModal(login,b.dataset.mk);});
+  drawAcctModal(login,"ov");
+  function drawAcctModal(login,mk){
+    const el=document.getElementById("am-body");if(!el)return;
+    if(mk==="ov"){
+      el.innerHTML=`<div class="kvt">
+        <span class="k">Balance</span><span class="v num">${money(c.balance)}</span>
+        <span class="k">Credit</span><span class="v num">${money(c.credit)}</span>
+        <span class="k">Equity</span><span class="v num">${money(cEq(c))}</span>
+        <span class="k">Free margin</span><span class="v num">${money(cEq(c)-cMargin(c.login))}</span>
+        <span class="k">Margin level</span><span class="v num">${(ml=>ml===null?"—":Math.round(ml)+"%")(marginLevel(c))}</span>
+        <span class="k">Open positions</span><span class="v num">${pos.length}</span></div>
+      <div class="sec" style="padding:14px 0 6px">Weighted-average price</div>
+      ${wrows?`<table class="dtable"><thead><tr><th>Symbol</th><th class="n">Avg buy</th><th class="n">Avg sell</th><th class="n">Lots</th></tr></thead><tbody>${wrows}</tbody></table>`:`<div style="font-size:12.5px;color:var(--text3)">No open positions.</div>`}
+      <div class="sec" style="padding:14px 0 6px">Open positions · close by</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:4px">${acctPosRows(login)}</div>
+      <div class="sec" style="padding:14px 0 6px">Trading settings</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      ${tgRow("trade","Trading")}${tgRow("algo","Algorithmic trading")}${tgRow("trailing","Trailing stops")}${tgRow("api","API access")}${tgRow("vps","Sponsored VPS")}${tgRow("subs","Subscriptions")}</div>
+      <div class="sec" style="padding:14px 0 6px">Status</div>
+      <div class="mrow2" style="margin:0"><select class="asel" id="am-status">${["active","suspended","closed"].map(s=>`<option${a.status===s?" selected":""}>${s}</option>`).join("")}</select>
+      <button class="mbtn" onclick="acctSetStatus(${login})">Apply</button></div>`;
+    }else if(mk==="b360"){
+      el.innerHTML=`<div class="kvt">
+        <span class="k">Lifetime P/L</span><span class="v num" style="color:${life>=0?"var(--green)":"var(--red)"}">${sgn(life)}</span>
+        <span class="k">Net deposits</span><span class="v num">${money(depNet)}</span>
+        <span class="k">Closed deals</span><span class="v num">${deals.length}</span>
+        <span class="k">Docs (ID / PoA)</span><span class="v" style="display:flex;gap:4px;justify-content:flex-end;align-items:center"><span style="color:${c.docs.id?"var(--green)":"var(--text3)"}">${ic("check",14)}</span> / <span style="color:${c.docs.poa?"var(--green)":"var(--text3)"}">${ic("check",14)}</span></span>
+        <span class="k">Tags</span><span class="v">${(c.tags||[]).join(", ")||"—"}</span>
+        <span class="k">Notes</span><span class="v" style="font-weight:600">${esc(c.notes||"—")}</span></div>
+      <div class="sec" style="padding:14px 0 6px">Behavior timeline</div>
+      ${tl.map(t=>`<div class="audit"><b>${esc(t.action)}</b><div>${esc(t.detail||"")}</div><div class="at num">${esc(t.t||"")}</div></div>`).join("")||`<div style="font-size:12.5px;color:var(--text3)">No activity yet.</div>`}`;
+    }else if(mk==="bal"){
+      el.innerHTML=`<div class="kvt"><span class="k">Kind</span><select class="asel" id="am-kind">${kinds}</select>
+        <span class="k">Amount</span><input class="ainput num" id="am-amt" type="number" min="0" step="0.01">
+        <span class="k">Comment</span><input class="ainput" id="am-cmt" placeholder="Reason / reference"></div>
+      <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="acctBalDo(${login})">Apply balance op</button></div>
+      <div class="sec" style="padding:14px 0 6px">History</div>
+      ${S.balanceOps.filter(b=>b.login===login).slice(0,10).map(b=>`<div class="audit"><b>${esc(b.kind)}</b> <span class="num">${b.sign>0?"+":"−"}${money(b.amount)}</span><div>${esc(b.comment||"")}</div><div class="at num">${esc(b.t)}</div></div>`).join("")||`<div style="font-size:12.5px;color:var(--text3)">No balance ops yet.</div>`}`;
+    }else{
+      el.innerHTML=`<div class="kvt"><span class="k">Master password</span><span class="v"><button class="rbtn" onclick="acctPw(${login},'master')">Reset</button></span>
+        <span class="k">Investor password</span><span class="v"><button class="rbtn" onclick="acctPw(${login},'investor')">Reset</button></span>
+        <span class="k">TOTP 2FA</span><span class="v"><button class="switch${a.twofa?" on":""}" onclick="acct2fa(${login})" aria-label="TOTP"></button></span></div>
+      <div class="sec" style="padding:14px 0 6px">SSL certificates</div>
+      ${(a.certs||[]).map((x,i)=>`<div class="audit"><b>${esc(x.name)}</b><div>${esc(x.fp)}</div><div class="at"><button class="rbtn no" style="padding:4px 10px" onclick="acctCertDel(${login},${i})">Revoke</button></div></div>`).join("")||`<div style="font-size:12.5px;color:var(--text3);margin-bottom:8px">No certificates bound.</div>`}
+      <button class="rbtn" onclick="acctCertAdd(${login})">+ Bind certificate</button>`;
+    }
+  }
+  window._drawAcctModal=drawAcctModal;
+}
+function acctToggle(login,k){const a=ax(login);a.toggles[k]=!a.toggles[k];axHist(login,"Trading setting",`${k} → ${a.toggles[k]?"on":"off"}`);audit("manager","Trading toggle",`${login} ${k}=${a.toggles[k]}`);save();acctDetailRefresh(login);}
+function acctSetStatus(login){const a=ax(login);a.status=$("am-status").value;axHist(login,"Status change",a.status);audit("manager","Account status",`${login} → ${a.status}`);save();renderAccounts();acctDetailRefresh(login);}
+function acctBalDo(login){
+  const c=cli(login);if(!c)return;
+  const kind=$("am-kind").value,amt=+$("am-amt").value,cmt=$("am-cmt").value||"";
+  const pseudo={login:c.login,type:ax(login).type,balance:c.balance,credit:c.credit,archived:false};
+  try{
+    const r=OrbitAccounts.applyBalanceOp(pseudo,{kind,amount:amt,comment:cmt},Date.now());
+    c.balance=r.account.balance;c.credit=r.account.credit;
+    S.balanceOps.unshift({login,kind,amount:amt,sign:r.deal.sign,comment:cmt,t:nowHM(),by:"manager"});
+    axHist(login,"Balance op",`${kind} ${r.deal.sign>0?"+":"−"}${money(amt)} ${cmt}`);
+    audit("manager","Balance op",`${login} ${kind} ${money(amt)}`);
+    save();pushBackSafe(login);renderAccounts();acctDetailRefresh(login);toast("Balance op applied",`${kind} ${money(amt)} · demo`);
+  }catch(e){toast("Rejected",e.message);}
+}
+function acctPw(login,kind){axHist(login,"Password reset",kind);audit("manager","Password reset",`${login} ${kind}`);save();acctDetailRefresh(login);toast("Password reset",kind+" password · "+login+" · demo");}
+function acct2fa(login){const a=ax(login);a.twofa=!a.twofa;axHist(login,"TOTP 2FA",a.twofa?"enabled":"disabled");audit("manager","TOTP",`${login} ${a.twofa?"on":"off"}`);save();acctDetailRefresh(login);}
+function acctCertAdd(login){const a=ax(login);const n=(a.certs||[]).length+1;a.certs.push({name:"cert-"+n,fp:"SHA256:"+(Math.random().toString(16).slice(2,10)).toUpperCase()});axHist(login,"Certificate bound","cert-"+n);save();acctDetailRefresh(login);}
+function acctCertDel(login,i){const a=ax(login);a.certs.splice(i,1);axHist(login,"Certificate revoked","");save();acctDetailRefresh(login);}
+function acctDetailRefresh(login){const b=document.querySelector("[data-mk].on");const mk=b?b.dataset.mk:"ov";if(window._drawAcctModal)window._drawAcctModal(login,mk);}
+</script>
+<script>
+"use strict";
+/* ============ MARKET: watch detail, depth, economic calendar, alerts ============ */
+let mktTab="watch",mktSym=null,mktQ="";
+function renderMarket(){
+  if(focusIn("mkt-body"))return;
+  document.querySelectorAll("#mkt-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===mktTab);b.onclick=()=>{mktTab=b.dataset.k;renderMarket();};});
+  const el=$("mkt-body");if(!el)return;
+  if(mktTab==="watch")el.innerHTML=mktWatchHTML();
+  else if(mktTab==="depth")el.innerHTML=mktDepthHTML();
+  else if(mktTab==="cal")el.innerHTML=mktCalHTML();
+  else el.innerHTML=mktAlertsHTML();
+}
+function mktWatchHTML(){
+  const syms=(OrbitFeed.symbols&&OrbitFeed.symbols()||SYM_ORDER).filter(s=>!mktQ||s.toLowerCase().includes(mktQ.toLowerCase()));
+  return `<div class="frow"><input class="search" placeholder="Search symbol…" value="${esc(mktQ)}" oninput="mktQ=this.value;renderMarket()"></div>
+  <div class="sec">Market watch <span class="r"><span class="fbadge st-DEMO">DEMO</span> ${syms.length} symbols</span></div>
+  <div class="adv-grid">${syms.map(s=>{const q=quote(s),sp=getSpec(s);
+    return `<div class="card" style="cursor:pointer;margin-bottom:10px" onclick="mktDetail('${s}')">
+    <div style="display:flex;align-items:center;gap:10px"><b>${esc(dname(s))}</b>${badge(s)}
+    <span style="margin-left:auto" class="num"><span style="color:var(--sell)">${q?q.bid.toFixed(sp.digits):"—"}</span> · <span style="color:var(--buy)">${q?q.ask.toFixed(sp.digits):"—"}</span></span></div>
+    <div class="num" style="font-size:12px;color:var(--text3);margin-top:6px">${esc(sp.asset_class||sp.calcType||"forex")} · min ${sp.volMin} / max ${sp.volMax} · ${esc(sp.session||"")}</div></div>`;}).join("")}</div>`;
+}
+function mktDetail(sym){
+  const sp=getSpec(sym),q=quote(sym),dg=sp.digits||2;
+  const deals=(S.deals||[]).filter(d=>d.sym===sym);
+  const vol=deals.reduce((t,d)=>t+(+d.vol||0),0);
+  const hist=OrbitFeed.history?OrbitFeed.history(sym,60):[];
+  const pts=hist.map(h=>h.c!=null?h.c:h.close).filter(v=>v!=null);
+  const svg=tickSpark(pts,dg);
+  openModal(`<h3>${esc(dname(sym))} ${badge(sym)}</h3>
+  <p style="color:var(--text2);font-size:13px">${esc(sp.description||"")}</p>
+  <div class="kvt" style="margin-top:8px">
+    <span class="k">Bid / Ask</span><span class="v num">${q?q.bid.toFixed(dg)+" / "+q.ask.toFixed(dg):"—"}</span>
+    <span class="k">Digits</span><span class="v num">${sp.digits}</span>
+    <span class="k">Contract size</span><span class="v num">${sp.contract}</span>
+    <span class="k">Tick size / value</span><span class="v num">${sp.tickSize||sp.pipSize} / ${sp.tickValue||sp.pipValue}</span>
+    <span class="k">Calc type</span><span class="v">${esc(sp.calcType||"forex")}</span>
+    <span class="k">Execution</span><span class="v">${esc(sp.execution||"market")}</span>
+    <span class="k">Fill policies</span><span class="v">${esc((sp.fill||["FOK","IOC"]).join(", "))}</span>
+    <span class="k">Stops level</span><span class="v num">${sp.stops} pt</span>
+    <span class="k">Volume min/max/step</span><span class="v num">${sp.volMin} / ${sp.volMax} / ${sp.volStep}</span>
+    <span class="k">Swap long/short</span><span class="v num">${sp.swapL} / ${sp.swapS}</span>
+    <span class="k">Session</span><span class="v">${esc(sp.session||"")}</span></div>
+  <div class="sec" style="padding:14px 0 6px">Tick chart <span class="r">CSV</span></div>
+  ${svg}<div style="margin-top:8px"><button class="rbtn" onclick="mktCsv('${sym}')">Export ticks CSV</button></div>
+  <div class="sec" style="padding:14px 0 6px">Trade statistics</div>
+  <div class="kvt"><span class="k">Closed deals (demo)</span><span class="v num">${deals.length}</span>
+  <span class="k">Volume traded</span><span class="v num">${vol.toFixed(2)} lots</span></div>
+  <div class="mrow"><button class="mbtn sec" onclick="closeModal()">Close</button></div>`);
+}
+function tickSpark(pts,dg){
+  if(!pts.length)return `<div class="empty" style="padding:20px">No tick history in demo.</div>`;
+  const w=340,h=90,mn=Math.min(...pts),mx=Math.max(...pts),rg=(mx-mn)||1;
+  const d=pts.map((p,i)=>`${(i/(pts.length-1)*w).toFixed(1)},${(h-6-(p-mn)/rg*(h-12)).toFixed(1)}`).join(" ");
+  const up=pts[pts.length-1]>=pts[0];
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px;display:block;background:var(--bg3);border-radius:12px"><polyline points="${d}" fill="none" stroke="${up?"var(--buy)":"var(--sell)"}" stroke-width="2"/></svg>`;
+}
+function mktCsv(sym){
+  const hist=OrbitFeed.history?OrbitFeed.history(sym,200):[];
+  const csv="time,bid,ask\n"+hist.map(h=>`${h.t||""},${h.b??""},${h.a??""}`).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=sym+"-ticks.csv";a.click();
+  toast("CSV exported",sym+" ticks · demo");
+}
+function demoBook(sym){
+  const q=quote(sym);if(!q)return{bids:[],asks:[]};
+  const sp=getSpec(sym),dg=sp.digits||2,step=Math.pow(10,-dg);
+  let sd=sym.length*7919;const R=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
+  const bids=[],asks=[];
+  for(let i=0;i<10;i++){bids.push({price:+(q.bid-i*step*2).toFixed(dg),volume:+(R()*5+0.1).toFixed(2)});asks.push({price:+(q.ask+i*step*2).toFixed(dg),volume:+(R()*5+0.1).toFixed(2)});}
+  try{return OrbitLiquidity.aggregateBook(sym,[{source_id:"demo",bids,asks}],{depth_levels:10,sources:[{id:"demo",enabled:true}]});}
+  catch(e){return{bids:bids.slice(0,10),asks:asks.slice(0,10)};}
+}
+function mktDepthHTML(){
+  if(!mktSym||!SYM_ORDER.includes(mktSym))mktSym=SYM_ORDER[0];
+  const bk=demoBook(mktSym);
+  const maxV=Math.max.apply(null,bk.bids.concat(bk.asks).map(l=>l.volume||0).concat([0.01]));
+  const row=(l,cls)=>{const v=l.volume!=null?l.volume:l.vol||0;return `<div class="depline ${cls}"><i style="width:${Math.min(100,v/maxV*100)}%"></i><span class="num">${l.price}</span><span class="num">${(+v).toFixed(2)}</span></div>`;};
+  return `<div class="frow"><select class="fsel" id="dp-sym" onchange="mktSym=this.value;renderMarket()">${SYM_ORDER.map(s=>`<option${s===mktSym?" selected":""}>${s}</option>`).join("")}</select>
+  <span style="font-size:12px;color:var(--text3);align-self:center">DOM from aggregated demo feed · <span class="fbadge st-DEMO">DEMO</span></span></div>
+  <div class="card" style="padding:6px 0"><div class="depthgrid">
+    <div><div class="dh" style="color:var(--buy)">Bid</div>${bk.bids.slice(0,10).map(l=>row(l,"b")).join("")}</div>
+    <div><div class="dh" style="color:var(--sell)">Ask</div>${bk.asks.slice(0,10).map(l=>row(l,"")).join("")}</div>
+  </div></div>
+  <div class="card" style="font-size:12.5px;color:var(--text2);line-height:1.6">Depth of Market shows the aggregated order book per direction (max 32 levels per spec). One-click trading from the ladder is available in the Trader terminal.</div>`;
+}
+function mktCalHTML(){
+  const evs=(S.econ||[]).slice().sort((a,b)=>a.eventTime-b.eventTime);
+  const pr={high:"bad",medium:"warn",low:"dim"};
+  return `<div class="sec">Economic calendar <span class="r">${evs.length} events · demo feed</span></div>
+  ${evs.map(e=>{const d=new Date(e.eventTime);
+    return `<div class="card"><div style="display:flex;gap:10px;align-items:center">
+    <span class="chip ${pr[e.priority]||"dim"}">${esc(e.priority.toUpperCase())}</span>
+    <div><b>${esc(e.name)}</b><div style="font-size:12px;color:var(--text3)">${esc(e.country)} · ${esc(e.currency)} · ${d.toLocaleDateString()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</div></div>
+    <div class="num" style="margin-left:auto;font-size:12.5px;color:var(--text2)">F: ${e.forecast??"—"}<br>A: ${e.actual??"—"}</div></div></div>`;}).join("")||`<div class="card"><div class="empty">No upcoming events.</div></div>`}`;
+}
+function mktAlertsHTML(){
+  const conds=TerminalServices.ALERT_CONDITIONS||[];
+  return `<div class="sec">Alerts <span class="r">${S.malerts.length} active</span></div>
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">New alert</div>
+  <div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Symbol</span><select class="asel" id="al-sym">${SYM_ORDER.map(s=>`<option>${s}</option>`).join("")}</select>
+    <span class="k">Condition</span><select class="asel" id="al-cond">${conds.map(c=>`<option value="${c}">${c}</option>`).join("")}</select>
+    <span class="k">Direction</span><select class="asel" id="al-dir"><option value="above">above</option><option value="below">below</option></select>
+    <span class="k">Threshold</span><input class="ainput num" id="al-val" type="number" step="any"></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="mAlertAdd()">Arm alert</button></div></div>
+  <div id="mal-list">${S.malerts.map(mAlertRow).join("")||`<div class="card"><div class="empty">No alerts armed.</div></div>`}</div>
+  <div class="card" style="font-size:12.5px;color:var(--text2);line-height:1.6">Conditions: <b>${conds.join(" · ")}</b>. Bid/ask/last/volume alerts evaluate on every tick; time, positions and profit alerts evaluate on the book.</div>`;
+}
+function mAlertRow(a){
+  return `<div class="card"><div style="display:flex;align-items:center;gap:10px">
+  <span style="color:var(--${a.state==="triggered"?"red":"gold"})">${ic(a.state==="triggered"?"bell":"clock")}</span>
+  <div><b>${esc(a.symbol)}</b> ${esc(a.condition)} ${esc(a.direction)} <b class="num">${a.threshold}</b>
+  <div style="font-size:12px;color:var(--text3)">${esc(a.state)}${a.lastTriggeredAt?" · "+esc(a.lastTriggeredAt.slice(0,16).replace("T"," ")):""}</div></div>
+  <button class="rbtn no" style="margin-left:auto" onclick="mAlertDel('${a.id}')">Delete</button></div></div>`;
+}
+function mAlertAdd(){
+  const v={id:"ma"+Date.now(),symbol:$("al-sym").value,condition:$("al-cond").value,direction:$("al-dir").value,threshold:+$("al-val").value};
+  const chk=TerminalServices.validateAlert(v);
+  if(!chk.valid)return toast("Invalid alert",chk.errors.join("; "));
+  S.malerts.push(TerminalServices.makeAlert(v));save();renderMarket();toast("Alert armed",v.symbol+" "+v.condition+" "+v.direction+" "+v.threshold);
+}
+function mAlertDel(id){S.malerts=S.malerts.filter(a=>a.id!==id);save();renderMarket();}
+/* evaluate price alerts on the live book (called from renderAll tick) */
+function evalMAlerts(){
+  if(!S||!S.malerts||!S.malerts.length)return;
+  const market={now:Date.now(),quotes:{}};SYM_ORDER.forEach(s=>{const q=quote(s);if(q){market.quotes[s]={bid:q.bid,ask:q.ask,last:(q.bid+q.ask)/2,volume:0};market.quotes[s.toUpperCase()]=market.quotes[s];}});
+  const bySym={},pBySym={};S.positions.forEach(p=>{bySym[p.sym]=(bySym[p.sym]||0)+1;const v=plOf(p);pBySym[p.sym]=(pBySym[p.sym]||0)+(v||0);});
+  const account={positionsCount:S.positions.length,floatingProfit:bookPL()||0,positionsBySymbol:bySym,profitBySymbol:pBySym,uncoveredVolume:0,uncoveredBySymbol:{}};
+  const res=TerminalServices.evaluateAll(S.malerts,market,account);
+  const fired=res.filter(r=>r.triggered&&r.alert.state!=="triggered");
+  if(!fired.length)return;
+  S.malerts=TerminalServices.updateAll(S.malerts,market,account);
+  save();
+  fired.forEach(r=>{const a=r.alert;toast("Alert triggered",`${a.symbol} ${a.condition} ${a.direction} ${a.threshold}`);feedMsg("Alerts",`Triggered: ${a.symbol} ${a.condition} ${a.direction} ${a.threshold}`);});
+  if(document.querySelector('.mtab.on')&&document.querySelector('.mtab.on').dataset.t==="market")renderMarket();
+}
+/* ============ CORP OPS: bulk close, bulk balance, dividends/tax, splits ============ */
+let corpTab="bulkclose";
+function renderCorpOps(){
+  if(focusIn("corp-body"))return;
+  document.querySelectorAll("#corp-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===corpTab);b.onclick=()=>{corpTab=b.dataset.k;renderCorpOps();};});
+  const el=$("corp-body");if(!el)return;
+  if(corpTab==="bulkclose")el.innerHTML=corpCloseHTML();
+  else if(corpTab==="bulkbal")el.innerHTML=corpBalHTML();
+  else if(corpTab==="bulkpay")el.innerHTML=corpPayHTML();
+  else el.innerHTML=corpSplitHTML();
+}
+function corpSymOpts(sel){return `<option value="">All symbols</option>`+SYM_ORDER.map(s=>`<option${s===sel?" selected":""}>${s}</option>`).join("");}
+function corpGrpOpts(sel){return `<option value="">All groups</option>`+(S.groups||[]).map(g=>`<option value="${g.id}"${g.id===sel?" selected":""}>${esc(g.name)}</option>`).join("");}
+function corpCloseHTML(){
+  const pv=corpClosePreview();
+  return `<div class="sec">Bulk close <span class="r"><span class="fbadge st-DEMO">DEMO</span> impact preview</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Symbol mask</span><select class="asel" id="bc-sym" onchange="corpCloseHTMLR()">${corpSymOpts(window._bcSym||"")}</select>
+    <span class="k">Group</span><select class="asel" id="bc-grp" onchange="corpCloseHTMLR()">${corpGrpOpts(window._bcGrp||"")}</select>
+    <span class="k">Direction</span><select class="asel" id="bc-dir" onchange="corpCloseHTMLR()"><option value="">Both</option><option value="buy">Buy</option><option value="sell">Sell</option></select></div></div>
+  <div id="bc-prev">${corpClosePrevHTML(pv)}</div>`;
+}
+function corpClosePreview(){
+  const mask=window._bcSym||"",grp=window._bcGrp||"",dir=$("bc-dir")?$("bc-dir").value:"";
+  const list=S.positions.filter(p=>{
+    if(mask&&!OrbitCorporateActions.matchSymbolMask(p.sym,mask))return false;
+    if(grp&&cli(p.client)&&cli(p.client).group!==grp)return false;
+    if(dir&&p.dir!==dir)return false;return true;});
+  const est=list.map(p=>({p,pl:plOf(p),margin:marginOf(p)}));
+  const totPL=est.reduce((t,e)=>t+(e.pl||0),0),totM=est.reduce((t,e)=>t+e.margin,0);
+  const bySym={};est.forEach(e=>{const b=bySym[e.p.sym]||(bySym[e.p.sym]={n:0,vol:0,pl:0});b.n++;b.vol+=e.p.vol;b.pl+=e.pl||0;});
+  return{list,est,totPL,totM,bySym,count:list.length};
+}
+function corpClosePrevHTML(pv){
+  return `<div class="card"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div><div style="font-size:11px;color:var(--text3);font-weight:700">POSITIONS</div><div class="num" style="font-size:20px;font-weight:800">${pv.count}</div></div>
+    <div><div style="font-size:11px;color:var(--text3);font-weight:700">EST. P/L</div><div class="num" style="font-size:20px;font-weight:800;color:${pv.totPL>=0?"var(--green)":"var(--red)"}">${sgn(pv.totPL)}</div></div>
+    <div><div style="font-size:11px;color:var(--text3);font-weight:700">MARGIN FREED</div><div class="num" style="font-size:20px;font-weight:800">${money(pv.totM)}</div></div>
+    <button class="mbtn" style="margin-left:auto;flex:none" ${pv.count?"":"disabled"} onclick="corpCloseDo()">Close ${pv.count} position${pv.count===1?"":"s"}</button></div>
+  ${pv.count?`<table class="dtable" style="margin-top:10px"><thead><tr><th>Symbol</th><th class="n">Positions</th><th class="n">Lots</th><th class="n">Est. P/L</th></tr></thead><tbody>
+  ${Object.keys(pv.bySym).map(s=>`<tr><td>${esc(dname(s))}</td><td class="n">${pv.bySym[s].n}</td><td class="n">${pv.bySym[s].vol.toFixed(2)}</td><td class="n" style="color:${pv.bySym[s].pl>=0?"var(--green)":"var(--red)"}">${sgn(pv.bySym[s].pl)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty" style="padding:16px">No positions match the filter.</div>`}</div>`;
+}
+function corpCloseHTMLR(){window._bcSym=$("bc-sym").value;window._bcGrp=$("bc-grp").value;$("bc-prev").innerHTML=corpClosePrevHTML(corpClosePreview());}
+function corpCloseDo(){
+  const pv=corpClosePreview();if(!pv.count)return;
+  openModal(`<h3>Close ${pv.count} positions?</h3><p>Est. realized P/L <b class="num" style="color:${pv.totPL>=0?"var(--green)":"var(--red)"}">${sgn(pv.totPL)}</b> · margin freed <b class="num">${money(pv.totM)}</b>. This writes closed deals to the demo book.</p>
+  <div class="mrow"><button class="mbtn sec" onclick="closeModal()">Cancel</button><button class="mbtn dgr" onclick="corpCloseGo()">Close all</button></div>`);
+}
+function corpCloseGo(){
+  const pv=corpClosePreview();let n=0;
+  pv.est.forEach(e=>{const p=e.p;const c=closeFor(p);if(c===null)return;
+    S.deals.unshift({t:Date.now(),client:p.client,sym:p.sym,dir:p.dir,vol:p.vol,open:p.open,close:c,pl:e.pl||0,id:"mgr"+Date.now()+n,mgr:1,reason:"bulk-close"});
+    S.positions=S.positions.filter(x=>x!==p);n++;pushBackSafe(p.client);});
+  S.corpAudit.unshift({t:nowHM(),action:"Bulk close",detail:`${n} positions · est P/L ${sgn(pv.totPL)}`});
+  audit("manager","Bulk close",`${n} positions closed`);save();closeModal();renderCorpOps();renderAll();toast("Bulk close done",n+" positions · demo");
+}
+function corpBalHTML(){
+  return `<div class="sec">Bulk balance ops <span class="r">CSV: login,amount[,kind]</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Kind</span><select class="asel" id="bb-kind">${Object.keys(OrbitAccounts.DEAL_KINDS||{}).map(k=>`<option value="${k}">${OrbitAccounts.DEAL_KINDS[k].label}</option>`).join("")}</select>
+    <span class="k">Comment</span><input class="ainput" id="bb-cmt" placeholder="Reference"></div>
+  <textarea class="ainput num" id="bb-csv" style="margin-top:10px" placeholder="700101,250&#10;700102,-100,charge"></textarea>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="corpBalDo()">Apply bulk ops</button></div>
+  <div id="bb-out" style="margin-top:10px"></div></div>
+  <div class="sec">Audit</div><div id="bb-audit">${S.corpAudit.map(a=>`<div class="audit"><b>${esc(a.action)}</b><div>${esc(a.detail)}</div><div class="at num">${esc(a.t)}</div></div>`).join("")||`<div class="card"><div class="empty" style="padding:16px">No corporate actions yet.</div></div>`}</div>`;
+}
+function corpBalDo(){
+  const kind=$("bb-kind").value,cmt=$("bb-cmt").value||"bulk";
+  const rows=($("bb-csv").value||"").split("\n").map(r=>r.trim()).filter(Boolean);
+  let ok=0,fail=0;
+  rows.forEach(r=>{const[ls,amtS,k2]=r.split(",");const login=+ls,amt=+amtS,k=k2||kind;const c=cli(login);
+    if(!c||!isFinite(amt)||amt===0){fail++;return;}
+    try{const pseudo={login:c.login,type:ax(login).type,balance:c.balance,credit:c.credit,archived:false};
+      const res=OrbitAccounts.applyBalanceOp(pseudo,{kind:k,amount:Math.abs(amt)*(amt<0?-1:1)>0?Math.abs(amt):Math.abs(amt),comment:cmt},Date.now());
+      c.balance=res.account.balance;c.credit=res.account.credit;ok++;pushBackSafe(login);
+    }catch(e){fail++;}});
+  S.corpAudit.unshift({t:nowHM(),action:"Bulk balance",detail:`${ok} applied · ${fail} failed (${kind})`});
+  audit("manager","Bulk balance",`${ok} ok / ${fail} failed`);save();
+  $("bb-out").innerHTML=`<div class="card" style="margin:0"><b class="num">${ok}</b> applied · <b class="num" style="color:${fail?"var(--red)":"inherit"}">${fail}</b> failed</div>`;
+  toast("Bulk balance",ok+" applied · "+fail+" failed · demo");
+}
+function corpPayHTML(){
+  const kinds=(OrbitCorporateActions.PAYMENT_KINDS||["dividend","tax_credit"]).map(k=>`<option value="${k}">${k==="tax_credit"?"Tax credit":"Dividend"}</option>`).join("");
+  return `<div class="sec">Bulk payments by positions <span class="r">dividends / tax per lot</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Kind</span><select class="asel" id="bp-kind">${kinds}</select>
+    <span class="k">Symbol mask</span><select class="asel" id="bp-sym">${corpSymOpts("")}</select>
+    <span class="k">Per lot</span><input class="ainput num" id="bp-amt" type="number" step="0.01" value="1.5"></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="corpPayDo()">Preview &amp; apply</button></div>
+  <div id="bp-out" style="margin-top:10px"></div></div>`;
+}
+function corpPayDo(){
+  const kind=$("bp-kind").value,sym=$("bp-sym").value,per=+($("bp-amt").value)||0;
+  const mapped=S.positions.map(p=>({symbol:p.sym,direction:p.dir,volume:p.vol,login:p.client,id:p.id}));
+  const prev=OrbitCorporateActions.bulkPaymentsPreview(mapped,{kind,symbolMask:sym||"*",perLotAmount:per});
+  if(!prev.ok)return toast("Preview failed",prev.error||"invalid input");
+  const ops=prev.balance_operations||[];
+  let n=0,tot=0;
+  ops.forEach(op=>{const c=cli(op.login);if(!c)return;const amt=op.amount;
+    c.balance+=amt;tot+=amt;n++;pushBackSafe(c.login);
+    S.balanceOps.unshift({login:c.login,kind:kind==="tax_credit"?"tax":"dividend",amount:Math.abs(amt),sign:amt>=0?1:-1,comment:`bulk ${kind} @${per}/lot`,t:nowHM(),by:"manager"});});
+  S.corpAudit.unshift({t:nowHM(),action:"Bulk "+kind,detail:`${n} accounts · ${money(tot)}`});
+  audit("manager","Bulk payment",`${kind}: ${n} accounts, ${money(tot)}`);save();renderAll();
+  $("bp-out").innerHTML=`<div class="card" style="margin:0"><b class="num">${n}</b> accounts credited · total <b class="num">${money(tot)}</b> · demo</div>`;
+  toast("Bulk "+kind,n+" accounts · "+money(tot));
+}
+function corpSplitHTML(){
+  return `<div class="sec">Position splits <span class="r">ticket preserved</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Symbol</span><select class="asel" id="sp-sym">${SYM_ORDER.map(s=>`<option>${s}</option>`).join("")}</select>
+    <span class="k">Ratio (new:old)</span><input class="ainput num" id="sp-ratio" value="2:1">
+    <span class="k">Rounding</span><select class="asel" id="sp-rnd"><option value="down">down</option><option value="nearest">nearest</option></select></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="corpSplitDo()">Apply split</button></div>
+  <div id="sp-out" style="margin-top:10px"></div>
+  <div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:8px">Split closes and reopens each position with reason <b>Split</b>; the original ticket is preserved on the new position.</div></div>`;
+}
+function corpSplitDo(){
+  const sym=$("sp-sym").value,m=$("sp-ratio").value.match(/(\d+(?:\.\d+)?)\s*:\s*(\d+(?:\.\d+)?)/);
+  if(!m)return toast("Bad ratio","Use form like 2:1");
+  const ratio=+m[1]/+m[2];
+  const list=S.positions.filter(p=>p.sym===sym);let n=0;
+  list.forEach(p=>{try{
+    const r=OrbitCorporateActions.applySplit({ticket:p.id,symbol:p.sym,direction:p.dir,volume:p.vol,openPrice:p.open},{ratio,rounding:$("sp-rnd").value});
+    const nv=r.newVolume!=null?r.newVolume:p.vol*ratio, np=r.newPrice!=null?r.newPrice:p.open/ratio;
+    S.deals.unshift({t:Date.now(),client:p.client,sym:p.sym,dir:p.dir,vol:p.vol,open:p.open,close:p.open,pl:0,id:"mgr"+Date.now()+n,mgr:1,reason:"Split"});
+    p.vol=+nv.toFixed(2);p.open=+np.toFixed(6);p.ticket=p.id;p.splitFrom=ratio;n++;pushBackSafe(p.client);
+  }catch(e){}});
+  S.corpAudit.unshift({t:nowHM(),action:"Position split",detail:`${sym} ${m[1]}:${m[2]} · ${n} positions`});
+  audit("manager","Position split",`${sym} ${m[1]}:${m[2]} on ${n}`);save();renderAll();
+  $("sp-out").innerHTML=`<div class="card" style="margin:0"><b class="num">${n}</b> positions split ${esc(m[1])}:${esc(m[2])} · tickets preserved · demo</div>`;
+  toast("Split applied",n+" positions · demo");
+}
+</script>
+<script>
+"use strict";
+/* ============ COVER: summary, coverage, LP routing, stop-out ============ */
+let covTab="summary";
+function renderCover(){
+  if(focusIn("cov-body"))return;
+  document.querySelectorAll("#cov-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===covTab);b.onclick=()=>{covTab=b.dataset.k;renderCover();};});
+  const el=$("cov-body");if(!el)return;
+  if(covTab==="summary")el.innerHTML=covSummaryHTML();
+  else if(covTab==="insights")el.innerHTML=covInsightsHTML();
+  else if(covTab==="routing")el.innerHTML=covRoutingHTML();
+  else el.innerHTML=covStopoutHTML();
+  if(covTab==="insights")drawHeat();
+}
+function covPositions(){
+  return S.positions.map(p=>({symbol:p.sym,login:p.client,direction:p.dir,volume:p.vol,open_price:p.open,
+    profit:plOf(p),margin:marginOf(p)}));
+}
+function covMeta(){const m={};SYM_ORDER.forEach(s=>{const sp=getSpec(s);
+  m[s]={contractSize:sp.contract||1,baseCurrency:sp.base_currency||s.slice(0,3),profitCurrency:sp.profit_currency||"USD",tickValue:sp.tick_value||sp.pipValue||1};});return m;}
+function covQuotes(){const q={};SYM_ORDER.forEach(s=>{const qq=quote(s);if(qq)q[s]={bid:qq.bid,ask:qq.ask};});return q;}
+function covSummaryHTML(){
+  const rows=OrbitCoverage.summarizePositions(covPositions(),covQuotes(),covMeta());
+  const exp=OrbitCoverage.exposureByCurrency(covPositions(),[],covMeta(),covQuotes());
+  const body=rows.map(v=>`<tr><td>${esc(dname(v.symbol))}</td><td class="n">${v.buy_volume.toFixed(2)}</td><td class="n">${v.sell_volume.toFixed(2)}</td>
+    <td class="n" style="color:${v.net_volume>=0?"var(--buy)":"var(--sell)"}">${v.net_volume>=0?"+":""}${v.net_volume.toFixed(2)}</td><td class="n" style="color:${v.floating_profit>=0?"var(--green)":"var(--red)"}">${sgn(v.floating_profit)}</td></tr>`).join("");
+  const expRows=Object.keys(exp).map(c=>`<tr><td>${esc(c.replace("|"," · "))}</td><td class="n" style="color:${exp[c]>=0?"var(--green)":"var(--red)"}">${sgn(exp[c])}</td></tr>`).join("");
+  return `<div class="sec">Summary positions <span class="r">real-time · <span class="fbadge st-DEMO">DEMO</span></span></div>
+  <div class="card" style="padding:4px 0"><table class="dtable"><thead><tr><th>Symbol</th><th class="n">Buy lots</th><th class="n">Sell lots</th><th class="n">Net</th><th class="n">Profit</th></tr></thead><tbody>${body||`<tr><td colspan="5" style="text-align:center;color:var(--text3)">No open positions.</td></tr>`}</tbody></table></div>
+  <div class="sec">Exposure by currency <span class="r">client book</span></div>
+  <div class="card" style="padding:4px 0"><table class="dtable"><thead><tr><th>Currency</th><th class="n">Net exposure</th></tr></thead><tbody>${expRows||`<tr><td colspan="2" style="text-align:center;color:var(--text3)">—</td></tr>`}</tbody></table></div>
+  <div class="sec">Coverage setups <span class="r"><button class="rbtn" style="padding:6px 12px" onclick="covSetupNew()">+ New</button></span></div>
+  <div id="cov-list">${S.coverage.map(covSetupRow).join("")||`<div class="card"><div class="empty" style="padding:16px">No coverage configured. Cover client exposure with a coverage group + external account.</div></div>`}</div>`;
+}
+function covSetupRow(c){
+  return `<div class="card"><div style="display:flex;gap:10px;align-items:center">
+  <span style="color:var(--blue)">${ic("shield")}</span>
+  <div><b>${esc(c.name)}</b><div style="font-size:12px;color:var(--text3)">${esc(c.symbols)} · ${esc(c.lp||"no LP")} · coverage account ${esc(c.account||"—")}</div></div>
+  <button class="rbtn no" style="margin-left:auto" onclick="covSetupDel('${c.id}')">Delete</button></div></div>`;
+}
+function covSetupNew(){
+  openModal(`<h3>Coverage setup</h3>
+  <div class="kvt" style="grid-template-columns:1fr 1fr">
+  <span class="k">Name</span><input class="ainput" id="cv-name" value="XAU coverage">
+  <span class="k">Symbol mask</span><input class="ainput" id="cv-sym" value="XAU*">
+  <span class="k">Coverage account</span><input class="ainput num" id="cv-acct" placeholder="LP account login">
+  <span class="k">LP / gateway</span><input class="ainput" id="cv-lp" placeholder="lp-1"></div>
+  <div class="mrow"><button class="mbtn sec" onclick="closeModal()">Cancel</button><button class="mbtn" onclick="covSetupDo()">Save</button></div>`);
+}
+function covSetupDo(){
+  const s={id:"cv"+(S.covSeq++),name:$("cv-name").value||"Coverage",symbols:$("cv-sym").value||"*",account:$("cv-acct").value||"",lp:$("cv-lp").value||""};
+  const chk=OrbitCoverage.validateCoverageSetup?OrbitCoverage.validateCoverageSetup(s):{valid:true};
+  if(chk&&!chk.valid)return toast("Invalid setup",(chk.errors||[]).join("; "));
+  S.coverage.push(s);audit("manager","Coverage setup",s.name);save();closeModal();renderCover();toast("Coverage saved",s.name);
+}
+function covSetupDel(id){S.coverage=S.coverage.filter(c=>c.id!==id);save();renderCover();}
+/* ---- Advanced-only: AI dealing insights ---- */
+function covInsightsHTML(){
+  const flows=S.clients.map(c=>{
+    const ds=(S.deals||[]).filter(d=>d.client===c.login);
+    const wins=ds.filter(d=>(+d.pl||0)>0).length;
+    return{login:c.login,name:c.name,trades:ds.length,wins,winRate:ds.length?wins/ds.length:0,
+      volume:ds.reduce((t,d)=>t+(+d.vol||0),0)};});
+  const flagged=OrbitLiquidity.flagToxicFlows(flows.map(f=>({account_id:f.login,trades:f.trades,wins:f.wins,volume:f.volume})));
+  const uncov=OrbitCoverage.computeUncovered(covPositions(),S.coverage);
+  const mc=S.clients.map(c=>({c,ml:marginLevel(c)})).filter(x=>x.ml!==null&&x.ml<S.stopCfg.marginCall*1.25)
+    .sort((a,b)=>a.ml-b.ml).slice(0,8);
+  const volSpike=S.positions.filter(p=>p.vol>=5);
+  return `<div class="adv-only">
+  <div class="sec">AI dealing insights <span class="r"><span class="chip info">ADVANCED</span></span></div>
+  <div class="card"><div style="font-weight:800;margin-bottom:8px;display:flex;gap:8px;align-items:center;color:var(--gold)">${ic("bolt")} Toxic-flow flags</div>
+  ${flagged.length?`<table class="dtable"><thead><tr><th>Client</th><th class="n">Trades</th><th class="n">Win rate</th><th class="n">Volume</th></tr></thead><tbody>
+  ${flagged.map(f=>{const c=cli(f.account_id);return `<tr><td>${esc(c?c.name:"?")} <span class="num" style="color:var(--text3)">${f.account_id}</span></td><td class="n">${f.trades}</td><td class="n">${Math.round((f.win_rate||0)*100)}%</td><td class="n">${(+f.volume||0).toFixed(1)}</td></tr>`;}).join("")}</tbody></table>`
+  :`<div style="font-size:13px;color:var(--text2)">No toxic flow detected in the demo book. Flags trigger at ≥20 trades, ≥65% win rate, ≥10 lots.</div>`}</div>
+  <div class="card"><div style="font-weight:800;margin-bottom:8px;display:flex;gap:8px;align-items:center;color:var(--sell)">${ic("trend")} Unusual volume</div>
+  ${volSpike.map(p=>{const c=cli(p.client);return `<div class="audit"><b class="num">${p.vol} lots ${esc(dname(p.sym))}</b><div>${esc(c?c.name:"?")} (${p.client}) · ${p.dir}</div></div>`;}).join("")||`<div style="font-size:13px;color:var(--text2)">No positions ≥ 5 lots right now.</div>`}</div>
+  <div class="sec">Exposure heatmap <span class="r">net lots by symbol</span></div>
+  <div class="card"><canvas id="heat" style="width:100%;height:170px;display:block"></canvas>
+  <div style="font-size:11.5px;color:var(--text3);margin-top:6px">Blue = net long · Red = net short · size = exposure. Demo data.</div></div>
+  <div class="sec">Margin-call forecast <span class="r">next at-risk accounts</span></div>
+  <div class="card" style="padding:4px 0">${mc.map(x=>{const pct=Math.max(0,Math.min(100,x.ml/S.stopCfg.marginCall*100));
+    return `<div class="crow" style="cursor:default"><div><b class="num">${x.c.login}</b> · ${esc(x.c.name)}<div class="cl">ML <b class="num">${Math.round(x.ml)}%</b> vs call ${S.stopCfg.marginCall}%</div></div>
+    <div style="margin-left:auto;width:110px"><div class="bar"><i style="width:${pct}%;background:${x.ml<S.stopCfg.marginCall?"var(--red)":"var(--gold)"}"></i></div></div></div>`;}).join("")||`<div class="empty" style="padding:16px">No accounts near margin call.</div>`}</div>
+  <div class="sec">Coverage optimizer <span class="r">suggestions</span></div>
+  <div class="card">${covOptimizerHTML(uncov)}</div></div>
+  <div class="classic-only"><div class="card"><div style="font-size:13px;color:var(--text2);line-height:1.6">AI insights, the exposure heatmap, margin-call forecast and coverage optimizer are Advanced-mode features — switch to <b>Advanced</b> mode to use them.</div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="toggleUiMode()">Switch to Advanced</button></div></div></div>`;
+}
+function covOptimizerHTML(uncov){
+  const per=OrbitCoverage.netPerSymbol(covPositions());
+  const sugg=Object.keys(per).map(s=>{const net=per[s];
+    if(Math.abs(net)<0.5)return null;
+    return{sym:s,net,cover:Math.min(100,Math.round(Math.abs(net)/(Math.abs(net)+2)*100))};}).filter(Boolean);
+  if(!sugg.length)return `<div style="font-size:13px;color:var(--text2)">Book is flat — no coverage needed.</div>`;
+  return `<table class="dtable"><thead><tr><th>Symbol</th><th class="n">Net lots</th><th class="n">Suggested cover</th><th></th></tr></thead><tbody>
+  ${sugg.map(g=>`<tr><td>${esc(dname(g.sym))}</td><td class="n" style="color:${g.net>0?"var(--buy)":"var(--sell)"}">${g.net>0?"+":""}${g.net.toFixed(2)}</td><td class="n">${g.cover}%</td>
+  <td class="n"><button class="rbtn" style="padding:5px 12px" onclick="covOptApply('${g.sym}',${g.cover})">Apply</button></td></tr>`).join("")}</tbody></table>
+  <div style="font-size:12px;color:var(--text3);margin-top:8px">Applies a B-Book rule with coverage % to the routing table.</div>`;
+}
+function covOptApply(sym,pct){
+  const rule=Object.assign(OrbitLiquidity.defaultBookRule(),{id:"br"+Date.now(),name:"Auto "+dname(sym),symbol_mask:sym,group_mask:"*",book:"b",coverage_pct:pct,min_coverage_volume:1});
+  S.bookCfg.rules.push(rule);audit("manager","Coverage optimizer",`${sym} → B-Book ${pct}%`);save();toast("Rule applied",`${dname(sym)} B-Book ${pct}% cover`);renderCover();
+}
+function drawHeat(){
+  const cv=document.getElementById("heat");if(!cv)return;
+  const per=OrbitCoverage.netPerSymbol(covPositions());const keys=Object.keys(per);
+  const dpr=window.devicePixelRatio||1,W=cv.clientWidth||340,H=170;
+  cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
+  if(!keys.length){x.fillStyle="#8e8e93";x.font="13px -apple-system";x.fillText("No open positions",16,30);return;}
+  const max=Math.max.apply(null,keys.map(k=>Math.abs(per[k])).concat([0.01]));
+  const cols=Math.min(3,keys.length),cw=W/cols,rh=H/Math.ceil(keys.length/cols);
+  keys.forEach((k,i)=>{const net=per[k];const cx=(i%cols)*cw,cy=Math.floor(i/cols)*rh;
+    const a=Math.min(0.85,0.15+Math.abs(net)/max*0.7);
+    x.fillStyle=net>=0?`rgba(47,128,255,${a})`:`rgba(242,54,69,${a})`;
+    const pad=6,bx=cx+pad,by=cy+pad,bw=cw-pad*2,bh=rh-pad*2;
+    if(x.roundRect){x.beginPath();x.roundRect(bx,by,bw,bh,12);x.fill();}
+    else x.fillRect(bx,by,bw,bh);
+    x.fillStyle="#fff";x.font="700 13px -apple-system";x.fillText(dname(k),cx+pad+10,cy+pad+22);
+    x.font="600 12px -apple-system";x.fillText((net>=0?"+":"")+net.toFixed(2)+" lots",cx+pad+10,cy+pad+40);});
+}
+/* ---- LP routing (Ultency-style book routing) ---- */
+function covRoutingHTML(){
+  const rules=S.bookCfg.rules||[];
+  return `<div class="sec">Book routing <span class="r">A / B / C book</span></div>
+  ${rules.map((r,i)=>{const lbl=(OrbitLiquidity.BOOK_LABELS||{})[r.book]||r.book;
+    return `<div class="card"><div style="display:flex;gap:10px;align-items:center">
+    <span class="chip ${r.book==="a"?"buy":r.book==="b"?"info":"warn"}">${r.book.toUpperCase()}-BOOK</span>
+    <div><b>${esc(r.name||"Rule "+(i+1))}</b><div style="font-size:12px;color:var(--text3)">${esc(r.symbol_mask)} · ${esc(r.group_mask)} · cover ${r.coverage_pct||0}% · min ${r.min_coverage_volume||0} lots</div>
+    <div style="font-size:11.5px;color:var(--text3);margin-top:2px">${esc(lbl)}</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px"><button class="rbtn" onclick="covRuleTest(${i})">Test</button><button class="rbtn no" onclick="covRuleDel(${i})">Delete</button></div></div></div>`;}).join("")}
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">New routing rule</div>
+  <div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Name</span><input class="ainput" id="rt-name" value="B-Book majors">
+    <span class="k">Symbol mask</span><input class="ainput" id="rt-sym" value="*">
+    <span class="k">Group mask</span><input class="ainput" id="rt-grp" value="*">
+    <span class="k">Book</span><select class="asel" id="rt-book"><option value="b">B-Book (own book)</option><option value="a">A-Book (hedge to LP)</option><option value="c">C-Book (cross internal)</option></select>
+    <span class="k">Coverage %</span><input class="ainput num" id="rt-cov" type="number" value="30" min="0" max="100">
+    <span class="k">Min cover vol</span><input class="ainput num" id="rt-min" type="number" value="5" min="0" step="0.5">
+    <span class="k">LP id</span><input class="ainput" id="rt-lp" placeholder="lp-1"></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="covRuleAdd()">Add rule</button></div>
+  <div id="rt-test" style="margin-top:10px"></div>
+  <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.6">B-Book-first coverage: client volume stays on the book up to <b>min cover vol</b>; <b>coverage %</b> of the remainder is routed to the LP.</div></div>
+  <div id="lp-rep">${lpReportsHTML()}</div>`;
+}
+function covRuleAdd(){
+  const r=Object.assign(OrbitLiquidity.defaultBookRule(),{id:"br"+Date.now(),name:$("rt-name").value||"Rule",
+    symbol_mask:$("rt-sym").value||"*",group_mask:$("rt-grp").value||"*",book:$("rt-book").value,
+    coverage_pct:+$("rt-cov").value||0,min_coverage_volume:+$("rt-min").value||0,lp_id:$("rt-lp").value||null});
+  const chk=OrbitLiquidity.validateBookConfig({rules:S.bookCfg.rules.concat([r])});
+  if(!chk.valid)return toast("Invalid rule",(chk.errors||[]).join("; "));
+  S.bookCfg.rules.push(r);audit("manager","Routing rule",r.name);save();renderCover();toast("Rule added",r.name);
+}
+function covRuleDel(i){S.bookCfg.rules.splice(i,1);save();renderCover();}
+function covRuleTest(i){
+  const r=S.bookCfg.rules[i];
+  const alloc=OrbitLiquidity.allocateBookVolume(35,r)||{a:0,b:0,c:0};
+  $("rt-test").innerHTML=`<div class="card" style="margin:0;font-size:13px">Test 35 lots XAUUSDc/std → book <b>${r.book.toUpperCase()}</b> · stays on book <b class="num">${alloc.b.toFixed(2)}</b> · routed out (A) <b class="num">${alloc.a.toFixed(2)}</b> · crossed (C) <b class="num">${alloc.c.toFixed(2)}</b></div>`;
+}
+/* ---- stop-out / margin call ---- */
+function covStopoutHTML(){
+  const c=S.stopCfg;
+  return `<div class="sec">Margin call &amp; stop-out <span class="r">server-enforced</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Mode</span><select class="asel" id="so-mode"><option value="percent"${c.mode==="percent"?" selected":""}>Percent (margin level %)</option><option value="money"${c.mode==="money"?" selected":""}>Money (equity)</option></select>
+    <span class="k">Margin call level</span><input class="ainput num" id="so-mc" type="number" value="${c.marginCall}">
+    <span class="k">Stop-out level</span><input class="ainput num" id="so-so" type="number" value="${c.stopOut}">
+    <span class="k">Auto stop-out</span><span style="grid-column:2"><button class="switch${c.autoStopout?" on":""}" onclick="S.stopCfg.autoStopout=!S.stopCfg.autoStopout;save();renderCover()"></button></span>
+    <span class="k">Email on margin call</span><span style="grid-column:2"><button class="switch${c.mcEmail?" on":""}" onclick="S.stopCfg.mcEmail=!S.stopCfg.mcEmail;save();renderCover()"></button></span></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="covStopSave()">Save levels</button></div>
+  <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.6">Stop-out order: 1) pending orders by greatest reserved margin first, 2) largest floating-loss positions (netting: partial close with <span class="num">[so XX%]</span> comment).</div></div>
+  <div class="sec">Margin call window <span class="r">send warning</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Account</span><select class="asel" id="mc-login">${S.clients.map(x=>`<option value="${x.login}">${x.login} · ${esc(x.name)}</option>`).join("")}</select></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="covMcSend()">Send margin-call email</button><button class="mbtn sec" onclick="covStopRun()">Run stop-out check</button></div>
+  <div id="so-out" style="margin-top:10px"></div></div>`;
+}
+function covStopSave(){S.stopCfg.mode=$("so-mode").value;S.stopCfg.marginCall=+$("so-mc").value||120;S.stopCfg.stopOut=+$("so-so").value||80;save();audit("manager","Stop-out levels",`MC ${S.stopCfg.marginCall} / SO ${S.stopCfg.stopOut}`);toast("Levels saved","Margin call "+S.stopCfg.marginCall+" · stop-out "+S.stopCfg.stopOut);}
+function covMcSend(){
+  const login=+$("mc-login").value,c=cli(login);if(!c)return;
+  const tpl=(S.templates||[]).find(t=>t.id==="t1")||S.templates[0];
+  const body=OrbitMailbox.renderTemplate(tpl?tpl.body:"Margin call #LOGIN#",{login:c.login,balance:c.balance,equity:cEq(c),margin:cMargin(c.login),margin_level:marginLevel(c)});
+  S.mailLog.unshift({t:nowHM(),to:login,ch:"mail",subject:tpl?tpl.subject:"Margin call",body});
+  audit("manager","Margin call sent",String(login));save();toast("Margin-call email queued",login+" · demo mailbox");
+}
+function covStopRun(){
+  const cfg=S.stopCfg;
+  const victims=S.clients.filter(c=>{const ml=marginLevel(c);return ml!==null&&ml<=cfg.stopOut;});
+  const plans=victims.map(c=>({login:c.login,plan:MarginEngine.stopOutPlan(
+    {login:c.login,equity:cEq(c),margin:cMargin(c.login),accounting:"hedging",type:"real"},
+    S.positions.filter(p=>p.client===c.login).map(p=>({id:p.id,profit:plOf(p)||0,volume:p.vol})),
+    S.orders.filter(o=>o.client===c.login).map(o=>({id:o.id,reserved_margin:50})),
+    {stop_out_level:cfg.stopOut,mode:cfg.mode})}));
+  const hits=plans.reduce((t,x)=>t+x.plan.length,0);
+  $("so-out").innerHTML=`<div class="card" style="margin:0;font-size:13px">Stop-out check complete: <b class="num">${victims.length}</b> account${victims.length===1?"":"s"} below stop-out · <b class="num">${hits}</b> action${hits===1?"":"s"} planned (orders by greatest margin first → largest-loss positions). ${hits?`<div style="margin-top:8px"><button class="mbtn dgr" onclick="covStopExec()">Execute stop-out</button></div>`:"Book is healthy."}</div>`;
+  window._stopPlans=plans;
+}
+function covStopExec(){
+  const plans=window._stopPlans||[];if(!plans.length)return;
+  let n=0;
+  plans.forEach(({plan})=>plan.forEach(a=>{
+    if(a.action==="close_position"){const p=S.positions.find(x=>x.id===a.id);
+      if(p){const cl=closeFor(p);S.deals.unshift({t:Date.now(),client:p.client,sym:p.sym,dir:p.dir,vol:p.vol,open:p.open,close:cl,pl:plOf(p)||0,id:"mgr"+Date.now()+n,mgr:1,reason:"SO"});S.positions=S.positions.filter(x=>x!==p);n++;pushBackSafe(p.client);}}
+    else if(a.action==="partial_close"){const p=S.positions.find(x=>x.id===a.id);
+      if(p&&a.fraction>0&&a.fraction<1){const cutVol=+(p.vol*a.fraction).toFixed(2);const cl=closeFor(p);
+        S.deals.unshift({t:Date.now(),client:p.client,sym:p.sym,dir:p.dir,vol:cutVol,open:p.open,close:cl,pl:(plOf(p)||0)*a.fraction,id:"mgr"+Date.now()+n,mgr:1,reason:"SO",comment:a.comment});
+        p.vol=+(p.vol-cutVol).toFixed(2);n++;pushBackSafe(p.client);}}
+    else if(a.action==="delete_order"){const o=S.orders.find(x=>x.id===a.id);if(o){S.orders=S.orders.filter(x=>x!==o);n++;}}}));
+  audit("manager","Stop-out executed",n+" actions");save();renderAll();toast("Stop-out executed",n+" actions · demo");
+}
+/* ============ PAYMENTS ============ */
+let payTab="queue";
+function payStore(){if(!S._payS)S._payS=OrbitPayments.newStore();return S._payS;}
+function renderPayments(){
+  if(focusIn("pay-body"))return;
+  document.querySelectorAll("#pay-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===payTab);b.onclick=()=>{payTab=b.dataset.k;renderPayments();};});
+  const el=$("pay-body");if(!el)return;
+  if(payTab==="queue")el.innerHTML=payQueueHTML();
+  else if(payTab==="rules")el.innerHTML=payRulesHTML();
+  else el.innerHTML=payProvHTML();
+}
+const PST_CHIP={initial:"dim",processing:"info",waiting:"warn",locked:"warn",done:"ok",rejected:"bad",canceled:"dim",failed:"bad"};
+function payList(){return (payStore().payments||[]).slice().reverse();}
+function payQueueHTML(){
+  const list=payList();
+  return `<div class="sec">Payments <span class="r">${list.filter(p=>OrbitPayments.isPaymentActive(p)).length} active · <span class="fbadge st-DEMO">DEMO</span></span></div>
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">New payment</div>
+  <div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Account</span><select class="asel" id="pm-login">${S.clients.map(x=>`<option value="${x.login}">${x.login} · ${esc(x.name)}</option>`).join("")}</select>
+    <span class="k">Type</span><select class="asel" id="pm-type"><option value="deposit">Deposit</option><option value="withdrawal">Withdrawal</option></select>
+    <span class="k">Method</span><select class="asel" id="pm-method">${S.providers.filter(p=>p.enabled).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select>
+    <span class="k">Amount</span><input class="ainput num" id="pm-amt" type="number" min="0" step="0.01"></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="payNew()">Create</button></div></div>
+  ${list.map(p=>{const c=cli(p.login);
+    return `<div class="card"><div style="display:flex;gap:10px;align-items:center">
+    <span class="chip ${PST_CHIP[p.state]||"dim"}">${esc((p.state||"").toUpperCase())}</span>
+    <div><b class="num">${money(p.amount)}</b> ${esc(p.type)} · ${esc(p.method)}<div style="font-size:12px;color:var(--text3)">${esc(c?c.name:"?")} (${p.login}) · ref ${esc(p.internal_ref||p.id)}</div></div>
+    <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+    ${p.state==="initial"?`<button class="rbtn" onclick="payTrans('${p.id}','processing')">Process</button>`:""}
+    ${p.state==="processing"?`<button class="rbtn" onclick="payTrans('${p.id}','waiting')">Hold</button><button class="rbtn ok" onclick="payAccept('${p.id}')">Complete</button>`:""}
+    ${p.state==="waiting"?`<button class="rbtn" onclick="payTrans('${p.id}','locked')">Lock</button>`:""}
+    ${p.state==="locked"?`<button class="rbtn ok" onclick="payAccept('${p.id}')">Accept</button><button class="rbtn no" onclick="payReject('${p.id}')">Reject</button>`:""}
+    ${OrbitPayments.isPaymentActive(p)?`<button class="rbtn no" onclick="payTrans('${p.id}','canceled')">Cancel</button>`:""}</div></div></div>`;}).join("")||`<div class="card"><div class="empty" style="padding:16px">No payments yet.</div></div>`}`;
+}
+function payNew(){
+  const login=+$("pm-login").value,type=$("pm-type").value,method=$("pm-method").value,amount=+$("pm-amt").value;
+  const r=OrbitPayments.createPayment(payStore(),{login,type,method,amount,currency:"USD",note:"manager-created"});
+  if(!r.ok)return toast("Rejected",(r.errors||[]).join("; "));
+  const p=r.payment;
+  const rule=(S.payRules||[]).find(x=>x.enabled&&((x.when==="withdrawal_over"&&type==="withdrawal"&&amount>=x.value)||(x.when==="deposit_over"&&type==="deposit"&&amount>=x.value)));
+  if(rule){const lr=OrbitPayments.transitionPayment(payStore(),p.id,"waiting",{by:"manager",note:rule.name});
+    if(!lr.ok)return toast("Rule hold failed",(lr.errors||[]).join("; "));}
+  else if((S.providers.find(x=>x.id===method)||{}).auto){const pr=OrbitPayments.transitionPayment(payStore(),p.id,"processing",{by:"system"});
+    if(!pr.ok)return toast("Auto-process failed",(pr.errors||[]).join("; "));}
+  audit("manager","Payment created",`${type} ${money(amount)} → ${login}`);save();renderPayments();toast("Payment created",p.id+" · demo");
+}
+function payTrans(id,to){
+  const r=OrbitPayments.transitionPayment(payStore(),id,to,{by:"manager"});
+  if(!r.ok)return toast("Transition blocked",(r.errors||[]).join("; "));
+  audit("manager","Payment "+to,id);save();renderPayments();
+}
+function payAccept(id){
+  const st=payStore(),p=OrbitPayments.findPayment(st,id);if(!p)return;
+  const tr=OrbitPayments.transitionPayment(st,id,"done",{by:"manager",accepted_by:"manager"});
+  if(!tr.ok)return toast("Transition blocked",(tr.errors||[]).join("; "));
+  const c=cli(p.login);
+  if(c){const pseudo={login:c.login,type:ax(p.login).type,balance:c.balance,credit:c.credit,archived:false};
+    try{const res=OrbitAccounts.applyBalanceOp(pseudo,{kind:p.type==="deposit"?"deposit":"withdrawal",amount:Math.abs(p.amount),comment:"payment "+p.id},Date.now());
+      c.balance=res.account.balance;c.credit=res.account.credit;pushBackSafe(c.login);}catch(e){return toast("Balance failed",e.message);}}
+  audit("manager","Payment accepted",id+" · "+money(p.amount));save();renderAll();toast("Payment done",money(p.amount)+" · demo");
+}
+function payReject(id){
+  const r=OrbitPayments.transitionPayment(payStore(),id,"rejected",{by:"manager"});
+  if(!r.ok)return toast("Blocked",(r.errors||[]).join("; "));
+  audit("manager","Payment rejected",id);save();renderPayments();
+}
+function payRulesHTML(){
+  return `<div class="sec">Processing rules <span class="r">evaluated on create</span></div>
+  ${S.payRules.map(r=>`<div class="card"><div style="display:flex;gap:10px;align-items:center">
+  <button class="switch${r.enabled?" on":""}" onclick="S.payRules.find(x=>x.id==='${r.id}').enabled=!S.payRules.find(x=>x.id==='${r.id}').enabled;save();renderPayments()"></button>
+  <div><b>${esc(r.name)}</b><div style="font-size:12px;color:var(--text3)">${esc(r.when)} ≥ <span class="num">${money(r.value)}</span> → ${esc(r.action)}</div></div>
+  <button class="rbtn no" style="margin-left:auto" onclick="S.payRules=S.payRules.filter(x=>x.id!=='${r.id}');save();renderPayments()">Delete</button></div></div>`).join("")}
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">New rule</div>
+  <div class="kvt" style="grid-template-columns:1fr 1fr">
+    <span class="k">Name</span><input class="ainput" id="pr-name" value="Lock large deposits">
+    <span class="k">When</span><select class="asel" id="pr-when"><option value="withdrawal_over">withdrawal over</option><option value="deposit_over">deposit over</option></select>
+    <span class="k">Amount ≥</span><input class="ainput num" id="pr-val" type="number" value="10000">
+    <span class="k">Action</span><select class="asel" id="pr-act"><option value="lock">lock</option><option value="reject">reject</option></select></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="payRuleAdd()">Add rule</button></div></div>`;
+}
+function payRuleAdd(){S.payRules.push({id:"r"+Date.now(),name:$("pr-name").value||"Rule",when:$("pr-when").value,value:+$("pr-val").value||0,action:$("pr-act").value,enabled:true});save();renderPayments();}
+function payProvHTML(){
+  return `<div class="sec">Providers <span class="r">card / e-wallet auto · bank manual</span></div>
+  ${S.providers.map(p=>`<div class="card"><div style="display:flex;gap:10px;align-items:center">
+  <button class="switch${p.enabled?" on":""}" onclick="S.providers.find(x=>x.id==='${p.id}').enabled=!S.providers.find(x=>x.id==='${p.id}').enabled;save();renderPayments()"></button>
+  <div><b>${esc(p.name)}</b><div style="font-size:12px;color:var(--text3)">${p.auto?"Auto-forward + manager confirm":"Manual with unique internal number"}</div></div>
+  <span class="chip ${p.auto?"info":"warn"}" style="margin-left:auto">${p.auto?"AUTO":"MANUAL"}</span></div></div>`).join("")}`;
+}
+</script>
+<script>
+"use strict";
+/* ============ SUBSCRIPTIONS ============ */
+let subTab="products";
+function renderSubs(){
+  if(focusIn("sub-body"))return;
+  document.querySelectorAll("#sub-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===subTab);b.onclick=()=>{subTab=b.dataset.k;renderSubs();};});
+  const el=$("sub-body");if(!el)return;
+  el.innerHTML=subTab==="products"?subProdHTML():subAssignHTML();
+}
+function subProdHTML(){
+  const lvObj=OrbitSubscriptions.DATA_LEVELS||{};
+  const lv=Array.isArray(lvObj)?lvObj:Object.keys(lvObj).map(k=>lvObj[k]);
+  return `<div class="sec">Products <span class="r"><span class="fbadge st-DEMO">DEMO</span> balance-charged</span></div>
+  ${S.subs.products.map(p=>`<div class="card"><div style="display:flex;gap:10px;align-items:center">
+  <span class="chip info">${esc(p.level)}</span>
+  <div><b>${esc(p.name)}</b><div style="font-size:12px;color:var(--text3)"><span class="num">${money(p.price)} / ${p.period_days}d</span> · ${p.news?"news included":"no news"} · ${p.enabled?"enabled":"disabled"}</div></div>
+  <button class="rbtn no" style="margin-left:auto" onclick="subProdDel('${p.id}')">Delete</button></div></div>`).join("")}
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">New product</div>
+  <div class="kvt" style="grid-template-columns:1fr 1fr">
+  <span class="k">Name</span><input class="ainput" id="sp-name" value="Tick history">
+  <span class="k">Data level</span><select class="asel" id="sp-lvl">${lv.map(l=>`<option value="${l}">${l}</option>`).join("")}</select>
+  <span class="k">Price</span><input class="ainput num" id="sp-price" type="number" value="99">
+  <span class="k">Period (days)</span><input class="ainput num" id="sp-per" type="number" value="30">
+  <span class="k">News gating</span><span style="grid-column:2"><button class="switch" id="sp-news" onclick="this.classList.toggle('on')"></button></span></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="subProdAdd()">Add product</button></div>
+  <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.6">Levels stack: ${lv.join(" → ")}. Max ${OrbitSubscriptions.MAX_CONNECTIONS_PER_SUBSCRIPTION||3} connections per subscription. Auto-renewal retries hourly (${OrbitSubscriptions.DEFAULT_MAX_RENEWAL_RETRIES||3}×); suspended on insufficient funds.</div></div>`;
+}
+function subProdAdd(){
+  const p={id:"p"+Date.now(),name:$("sp-name").value||"Product",level:$("sp-lvl").value,price:+$("sp-price").value||0,currency:"USD",period_days:+$("sp-per").value||30,news:$("sp-news").classList.contains("on"),enabled:true};
+  const chk=OrbitSubscriptions.validateProduct(p);if(!chk.valid)return toast("Invalid product",(chk.errors||[]).join("; "));
+  S.subs.products.push(p);save();renderSubs();toast("Product added",p.name);
+}
+function subProdDel(id){S.subs.products=S.subs.products.filter(p=>p.id!==id);save();renderSubs();}
+function subAssignHTML(){
+  return `<div class="sec">Client subscriptions <span class="r">auto-renewal</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+  <span class="k">Account</span><select class="asel" id="sa-login">${S.clients.map(x=>`<option value="${x.login}">${x.login} · ${esc(x.name)}</option>`).join("")}</select>
+  <span class="k">Product</span><select class="asel" id="sa-prod">${S.subs.products.map(p=>`<option value="${p.id}">${esc(p.name)} · ${money(p.price)}</option>`).join("")}</select></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="subAssignDo()">Activate (charge balance)</button></div></div>
+  ${S.subs.assign.map(s=>{const c=cli(s.login),p=S.subs.products.find(x=>x.id===s.productId);
+    return `<div class="card"><div style="display:flex;gap:10px;align-items:center">
+    <span class="chip ${s.status==="active"?"ok":"warn"}">${esc((s.status||"").toUpperCase())}</span>
+    <div><b>${esc(p?p.name:"?")}</b><div style="font-size:12px;color:var(--text3)">${esc(c?c.name:"?")} (${s.login}) · renews ${esc(s.nextRenewal||"—")} · retries ${s.retries||0}</div></div>
+    <div style="margin-left:auto;display:flex;gap:6px">${s.status!=="active"?`<button class="rbtn" onclick="subRenew('${s.id}')">Renew</button>`:""}<button class="rbtn no" onclick="subCancel('${s.id}')">Cancel</button></div></div></div>`;}).join("")||`<div class="card"><div class="empty" style="padding:16px">No subscriptions yet.</div></div>`}`;
+}
+function subAssignDo(){
+  const login=+$("sa-login").value,pid=$("sa-prod").value;
+  const c=cli(login),p=S.subs.products.find(x=>x.id===pid);if(!c||!p)return;
+  const acct={login:c.login,type:"live",balance:c.balance};
+  const act=OrbitSubscriptions.activate(acct,p,new Date());
+  if(!act.ok)return toast("Activation blocked",act.error==="demo_account"?"Live accounts only in this demo":act.error);
+  if(act.charge)c.balance+=act.charge.amount;
+  S.balanceOps.unshift({login,kind:"charge",amount:p.price,sign:-1,comment:"subscription: "+p.name,t:nowHM(),by:"system"});
+  const sb=act.subscription||{};
+  S.subs.assign.push({id:"s"+(S.subs.seq++),login,productId:pid,status:sb.status||"active",
+    started:(sb.started_at||"").slice(0,10),nextRenewal:(sb.next_renewal_at||"").slice(0,10),retries:0,connections:0});
+  audit("manager","Subscription",`${p.name} → ${login}`);save();pushBackSafe(login);renderSubs();toast("Subscription active",p.name+" · demo");
+}
+function subRenew(id){
+  const s=S.subs.assign.find(x=>x.id===id);if(!s)return;const c=cli(s.login),p=S.subs.products.find(x=>x.id===s.productId);
+  const sub={id:s.id,status:s.status,next_renewal_at:s.nextRenewal,renewal_attempts:s.retries||0};
+  const r=OrbitSubscriptions.renewWithRetry(sub,{login:c.login,type:"live",balance:c.balance},p,new Date(),{});
+  if(r.renewed){if(r.charge)c.balance+=r.charge.amount;s.nextRenewal=(r.patch.next_renewal_at||"").slice(0,10);s.retries=0;s.status="active";toast("Renewed",p.name);}
+  else{s.retries=(s.retries||0)+1;s.status="suspended";toast("Renewal failed","Insufficient funds — suspended · demo");}
+  save();pushBackSafe(s.login);renderSubs();
+}
+function subCancel(id){const s=S.subs.assign.find(x=>x.id===id);if(s){s.status="canceled";audit("manager","Subscription canceled",id);save();renderSubs();}}
+/* ============ SYSTEM ============ */
+let sysTab="security";
+function renderSystem(){
+  if(focusIn("sys-body"))return;
+  document.querySelectorAll("#sys-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===sysTab);b.onclick=()=>{sysTab=b.dataset.k;renderSystem();};});
+  const el=$("sys-body");if(!el)return;
+  if(sysTab==="security")el.innerHTML=sysSecHTML();
+  else if(sysTab==="dealer")el.innerHTML=sysDealerHTML();
+  else if(sysTab==="risk")el.innerHTML=sysRiskHTML();
+  else if(sysTab==="plugins")el.innerHTML=sysPluginsHTML();
+  else if(sysTab==="journal"){el.innerHTML=sysJournalHTML();setTimeout(renderJournalList,0);}
+  else el.innerHTML=sysPortHTML();
+}
+function sysSecHTML(){
+  if(!S.secCfg)S.secCfg={authMode:"password",totp:false,certAuth:false,minPw:8,forcePw:true,pushFrom:"server"};
+  const c=S.secCfg;
+  return `<div class="sec">Manager security <span class="r"><span class="fbadge st-DEMO">DEMO</span></span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+  <span class="k">Auth mode</span><select class="asel" id="sc-mode">${["password","password+cert","cert-only"].map(m=>`<option${c.authMode===m?" selected":""}>${m}</option>`).join("")}</select>
+  <span class="k">Min password length</span><input class="ainput num" id="sc-min" type="number" value="${c.minPw}" min="4" max="32">
+  <span class="k">TOTP 2FA (30s)</span><span style="grid-column:2"><button class="switch${c.totp?" on":""}" onclick="S.secCfg.totp=!S.secCfg.totp;save();renderSystem()"></button></span>
+  <span class="k">SSL cert auth</span><span style="grid-column:2"><button class="switch${c.certAuth?" on":""}" onclick="S.secCfg.certAuth=!S.secCfg.certAuth;save();renderSystem()"></button></span>
+  <span class="k">Force pw change</span><span style="grid-column:2"><button class="switch${c.forcePw?" on":""}" onclick="S.secCfg.forcePw=!S.secCfg.forcePw;save();renderSystem()"></button></span>
+  <span class="k">Push source</span><select class="asel" id="sc-push"><option value="server"${c.pushFrom==="server"?" selected":""}>server</option><option value="terminal"${c.pushFrom==="terminal"?" selected":""}>terminal</option></select></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="sysSecSave()">Save</button></div></div>
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">My TOTP enrollment</div>
+  ${c.totp?`<div class="num" style="font-size:15px;letter-spacing:.15em">JBSW Y3DP EHPK 3PXP</div><div style="font-size:12px;color:var(--text3);margin-top:6px">Scan in your authenticator app. Demo secret — do not use for real auth.</div>`:`<div style="font-size:13px;color:var(--text2)">Enable TOTP above, then enroll.</div>`}</div>`;
+}
+function sysSecSave(){S.secCfg.authMode=$("sc-mode").value;S.secCfg.minPw=+$("sc-min").value||8;S.secCfg.pushFrom=$("sc-push").value;audit("manager","Security config",S.secCfg.authMode);save();toast("Security saved","demo");}
+function sysDealerHTML(){
+  const types=OrbitAutomations.REQUEST_TYPES||[];
+  return `<div class="sec">Dealer automation <span class="r">per request type</span></div>
+  ${types.map(t=>{const cfg=S.autoCfg[t.name]||{auto:false,maxVol:5,timeout:60};
+    return `<div class="card"><div style="display:flex;gap:10px;align-items:center">
+    <button class="switch${cfg.auto?" on":""}" onclick="S.autoCfg['${t.name}'].auto=!S.autoCfg['${t.name}'].auto;save();renderSystem()" aria-label="auto"></button>
+    <div><b>${esc(t.name)}</b><div style="font-size:12px;color:var(--text3)">${esc(t.description||"")}</div></div></div>
+    <div class="kvt" style="grid-template-columns:1fr 1fr;margin-top:10px">
+    <span class="k">Max volume (lots)</span><input class="ainput num" type="number" step="0.5" value="${cfg.maxVol}" onchange="S.autoCfg['${t.name}'].maxVol=+this.value||0;save()">
+    <span class="k">Answer timeout (s)</span><input class="ainput num" type="number" value="${cfg.timeout}" min="20" max="180" onchange="S.autoCfg['${t.name}'].timeout=Math.min(180,Math.max(20,+this.value||60));save();renderSystem()"></div></div>`;}).join("")}
+  <div class="card" style="font-size:12.5px;color:var(--text2);line-height:1.6">Answer timeout is clamped to 20–180 s per spec. Auto-processing applies when the request volume ≤ max volume; anything larger stays in the dealer queue.</div>
+  <div class="mrow2" style="margin:0 16px"><button class="mbtn sec" onclick="sysDealerSim()">Simulate auto-decision</button></div><div id="ad-sim" style="margin:10px 16px 0"></div>`;
+}
+function sysDealerSim(){
+  const t=(OrbitAutomations.REQUEST_TYPES||[])[0];if(!t)return;
+  const rules={};Object.keys(S.autoCfg).forEach(k=>{const c=S.autoCfg[k];rules[k]={autoProcess:!!c.auto,maxVolume:+c.maxVol||0,allowedSymbols:"*"};});
+  const d=OrbitAutomations.decideRequest({type:t.name,volume:3,symbol:"XAUUSDc"},{id:"dealer-auto",enabled:true,rules});
+  $("ad-sim").innerHTML=`<div class="card" style="margin:0;font-size:13px">Simulated <b>${esc(t.name)}</b> 3.00 lots → <b>${esc(d.action)}</b> (${esc(d.reason)})</div>`;
+  audit("manager","Dealer auto sim",`${t.name} → ${d.action}`);save();
+}
+function sysRiskHTML(){
+  return `<div class="sec">Groups — spread / commission / swap <span class="r">white label</span></div>
+  ${(S.groups||[]).map(g=>{const r=S.groupRisk[g.id]||{};
+    return `<div class="card"><b>${esc(g.name)}</b>
+    <div class="kvt" style="grid-template-columns:1fr 1fr;margin-top:10px">
+    <span class="k">Spread markup (pt)</span><input class="ainput num" type="number" value="${r.spreadMarkup||0}" onchange="S.groupRisk['${g.id}'].spreadMarkup=+this.value||0;save()">
+    <span class="k">Commission /M</span><input class="ainput num" type="number" value="${r.commission||0}" onchange="S.groupRisk['${g.id}'].commission=+this.value||0;save()">
+    <span class="k">Swaps</span><span style="grid-column:2"><button class="switch${r.swap?" on":""}" onclick="S.groupRisk['${g.id}'].swap=!S.groupRisk['${g.id}'].swap;save();renderSystem()"></button></span>
+    <span class="k">Swap-free</span><span style="grid-column:2"><button class="switch${r.swapFree?" on":""}" onclick="S.groupRisk['${g.id}'].swapFree=!S.groupRisk['${g.id}'].swapFree;save();renderSystem()"></button></span></div></div>`;}).join("")}`;
+}
+function sysPluginsHTML(){
+  return `<div class="sec">Plugins <span class="r">server API extensions</span></div>
+  ${S.plugins.map((p,i)=>`<div class="card"><div style="display:flex;gap:10px;align-items:center">
+  <button class="switch${p.enabled?" on":""}" onclick="S.plugins[${i}].enabled=!S.plugins[${i}].enabled;save();renderSystem()"></button>
+  <div><b>${esc(p.name)}</b><div style="font-size:12px;color:var(--text3)">${esc(p.file)}${p.flags?" · flags: "+esc(p.flags):""}</div></div>
+  <button class="rbtn no" style="margin-left:auto" onclick="S.plugins.splice(${i},1);save();renderSystem()">Remove</button></div></div>`).join("")}
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+  <span class="k">Name</span><input class="ainput" id="pg-name" placeholder="My plugin">
+  <span class="k">File</span><input class="ainput" id="pg-file" placeholder="my-plugin.dll">
+  <span class="k">Flags</span><input class="ainput" id="pg-flags" placeholder="manager-configurable"></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="S.plugins.push({id:'plg'+Date.now(),name:$('pg-name').value||'Plugin',file:$('pg-file').value||'plugin.dll',enabled:false,flags:$('pg-flags').value||''});save();renderSystem()">Add plugin</button></div></div>`;
+}
+function sysJournalHTML(){
+  return `<div class="sec">Trade-server journal <span class="r">keyword search: a | b · a &amp; b · a ^ b</span></div>
+  <div class="frow"><input class="search" id="jn-q" placeholder="Search journal… (e.g. margin | feed)" oninput="renderJournalList()"></div>
+  <div id="jn-list"></div>`;
+}
+function journalMatch(msg,q){
+  if(!q)return true;msg=msg.toLowerCase();
+  const or=q.split("|").map(s=>s.trim().toLowerCase()).filter(Boolean);
+  return or.some(part=>{
+    const not=part.split("^").map(s=>s.trim()).filter(Boolean);
+    const pos=not[0]||"",neg=not.slice(1);
+    const posOk=pos.split("&").map(s=>s.trim()).filter(Boolean).every(t=>msg.includes(t));
+    const negOk=neg.every(t=>!msg.includes(t));
+    return posOk&&negOk;});
+}
+function renderJournalList(){
+  const q=($("jn-q")||{}).value||"";
+  const list=(S.journal||[]).filter(j=>journalMatch(j.comp+" "+j.msg,q));
+  const lv={info:"info",warn:"warn",error:"bad"};
+  const el=$("jn-list");if(!el)return;
+  el.innerHTML=list.map(j=>`<div class="audit"><b class="chip ${lv[j.level]||"dim"}">${esc(j.comp)}</b> <span class="num" style="color:var(--text3)">${esc(j.t)}</span><div>${esc(j.msg)}</div></div>`).join("")||`<div class="card"><div class="empty" style="padding:16px">No journal entries match.</div></div>`;
+}
+function sysPortHTML(){
+  const secs=OrbitConfigPortability.sectionNames();
+  return `<div class="sec">Import / export settings <span class="r">JSON · UTF-16</span></div>
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">Export</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">${secs.map(s=>`<label style="font-size:12.5px;display:flex;gap:6px;align-items:center"><input type="checkbox" class="px-sec" value="${esc(s)}" checked> ${esc(s)}</label>`).join("")}</div>
+  <div class="mrow2" style="margin:0"><button class="mbtn" onclick="portExport()">Export JSON</button></div>
+  <div class="sec" style="padding:14px 0 6px">Import</div>
+  <textarea class="ainput" id="px-in" placeholder='Paste exported JSON…'></textarea>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn sec" onclick="portImport()">Validate &amp; import</button></div><div id="px-out" style="margin-top:8px"></div>
+  <div class="sec" style="padding:14px 0 6px">CLI</div>
+  <div class="num" style="font-size:12.5px;background:var(--bg3);border-radius:10px;padding:10px 12px">orbit-server --export --type groups --file groups.json<br>orbit-server --import --type symbols --file symbols.json</div></div>`;
+}
+function portExport(){
+  try{
+    const secs=[...document.querySelectorAll(".px-sec:checked")].map(x=>x.value);
+    const data={groups:S.groups,bookCfg:S.bookCfg,routingCfg:S.routingCfg,groupRisk:S.groupRisk,autoCfg:S.autoCfg,stopCfg:S.stopCfg,templates:S.templates,payRules:S.payRules};
+    const env=OrbitConfigPortability.exportConfig(secs,data);
+    const blob=new Blob([JSON.stringify(env,null,1)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="orbit-config.json";a.click();
+    toast("Exported",secs.length+" sections · demo");
+  }catch(e){toast("Export failed",e.message);}
+}
+function portImport(){
+  try{
+    const env=JSON.parse($("px-in").value||"{}");
+    const v=OrbitConfigPortability.validateEnvelope(env);
+    if(!v.valid)return $("px-out").innerHTML=`<div style="color:var(--red);font-size:13px">${v.errors.map(esc).join("<br>")}</div>`;
+    $("px-out").innerHTML=`<div style="color:var(--green);font-size:13px">Valid envelope · ${v.sections.length} sections · format ${esc(env.format||"")}. Apply is a demo no-op (server holds authority).</div>`;
+    audit("manager","Config import validated",v.sections.length+" sections");save();
+  }catch(e){$("px-out").innerHTML=`<div style="color:var(--red);font-size:13px">Invalid JSON: ${esc(e.message)}</div>`;}
+}
+/* ============ DOCS: trading fundamentals + margin calc ============ */
+let docTab="lifecycle";
+function renderDocs(){
+  if(focusIn("doc-body"))return;
+  document.querySelectorAll("#doc-tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.k===docTab);b.onclick=()=>{docTab=b.dataset.k;renderDocs();};});
+  const el=$("doc-body");if(!el)return;
+  if(docTab==="lifecycle")el.innerHTML=docLifecycleHTML();
+  else if(docTab==="margin")el.innerHTML=docMarginHTML();
+  else el.innerHTML=docOrdersHTML();
+  document.querySelectorAll("#doc-body .acc>button").forEach(b=>b.onclick=()=>b.parentNode.classList.toggle("open"));
+}
+function acc(t,body){return `<div class="acc"><button>${t}<span class="chev">${ic("chev",16)}</span></button><div class="abody">${body}</div></div>`;}
+function docLifecycleHTML(){
+  const L=OrbitTradeLifecycle;
+  const types=(L.ORDER_TYPES||[]).map(t=>{const n=String(t.name||t).replace(/_/g," ");
+    return `<tr><td><b>${esc(n)}</b></td><td>${esc(t.kind||(/market/.test(n)?"market":/sl|tp/.test(n)?"protective":"pending"))}</td></tr>`;}).join("");
+  return `<div class="sec">Trading fundamentals <span class="r">behavioral reference</span></div>
+  ${acc("Order → deal → position lifecycle",`<div class="deprow">
+    <div class="q">Order<small>request</small></div><span class="arw">→</span><div class="q">Checks<small>margin · session</small></div><span class="arw">→</span><div class="q">Deal<small>execution</small></div><span class="arw">→</span><div class="q">Position<small>open / modify</small></div></div>
+    Every step is linked by <b>ticket</b> numbers (plus external venue IDs). A market order becomes a deal immediately; a pending order waits for its trigger price, then becomes a deal. Deals change positions: open, increase, decrease, close, or reverse.`)}
+  ${acc("Netting vs hedging",`On a <b>netting</b> account there is one position per symbol — new deals merge into it (weighted-average price). On a <b>hedging</b> account each deal opens its own position, so opposite positions can coexist. Closing a hedging position never touches the opposite one; use <b>Close By</b> to close an opposite pair and save one spread.`)}
+  ${acc("SL / TP inheritance",`Stop-loss and take-profit live on the <b>position</b>, not the order. New deals inherit the position's SL/TP unless the request sets its own. Modifying SL/TP on a netting position moves the whole position's protection.`)}
+  ${acc("Order types",`<table class="dtable"><thead><tr><th>Type</th><th class="n">Kind</th></tr></thead><tbody>${types||'<tr><td colspan="2">—</td></tr>'}</tbody></table>`)}
+  ${acc("Order states",`<p>${(L.ORDER_STATES||["started","placed","partially filled","filled","canceled","rejected","expired"]).map(s=>esc(String(s).replace(/_/g," "))).join(" → ")}</p>`)}
+  ${acc("Reason codes",`Orders and deals carry a reason: Client, Expert, Dealer, SL, TP, SO (stop-out), Rollover, Split, Correction, Gateway, Signal. Shown in history and audit.`)}`;
+}
+function docMarginHTML(){
+  return `<div class="sec">Margin calculator <span class="r">per calc type</span></div>
+  <div class="card"><div class="kvt" style="grid-template-columns:1fr 1fr">
+  <span class="k">Symbol</span><select class="asel" id="mc-sym">${SYM_ORDER.map(s=>`<option>${s}</option>`).join("")}</select>
+  <span class="k">Calc type</span><select class="asel" id="mc-type">${["forex","forex_no_leverage","cfd","cfd_leverage","cfd_index","futures"].map(t=>`<option value="${t}">${t}</option>`).join("")}</select>
+  <span class="k">Volume (lots)</span><input class="ainput num" id="mc-vol" type="number" value="1" step="0.1">
+  <span class="k">Price</span><input class="ainput num" id="mc-px" type="number" step="any" placeholder="market">
+  <span class="k">Leverage</span><select class="asel" id="mc-lev"><option>100</option><option>200</option><option>500</option></select></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="docMarginGo()">Calculate</button></div>
+  <div id="mc-out" style="margin-top:10px"></div></div>
+  <div class="card" style="font-size:12.5px;color:var(--text2);line-height:1.7"><b>Formulas</b><br>
+  Forex: Volume × Contract / Leverage<br>CFD: Volume × Contract × Price / Leverage<br>CFD Index: Volume × Tick value / Tick size × Price / Leverage<br>Futures: initial / maintenance margin from exchange specs<br>Netting margin is spread-aware across stages; hedging aggregates same-direction legs (basic vs larger-leg mode).</div>`;
+}
+function docMarginGo(){
+  const sym=$("mc-sym").value,type=$("mc-type").value,vol=+$("mc-vol").value||0;
+  const sp=getSpec(sym);let px=+($("mc-px").value)||(quote(sym)?(quote(sym).bid+quote(sym).ask)/2:sp.tickValue||1);
+  const lev=+$("mc-lev").value||100;const MM=MoneyMath;let m=null,f="";
+  try{
+    if(type==="forex"){m=MM.marginForex(vol,sp.contract,lev);f=`${vol} × ${sp.contract} / ${lev}`;}
+    else if(type==="forex_no_leverage"){m=MM.marginForexNoLeverage(vol,sp.contract,px);f=`${vol} × ${sp.contract} × ${px}`;}
+    else if(type==="cfd"){m=MM.marginCfd(vol,sp.contract,px);f=`${vol} × ${sp.contract} × ${px} (no leverage)`;}
+    else if(type==="cfd_leverage"){m=MM.marginCfdLeverage(vol,sp.contract,px,lev);f=`${vol} × ${sp.contract} × ${px} / ${lev}`;}
+    else if(type==="cfd_index"){m=MM.marginCfdIndex(vol,sp.contract,px,sp.tick_value||sp.tickValue||sp.pipValue||1,sp.tick_size||sp.tickSize||sp.pipSize||0.01);f=`${vol} × ${sp.contract} × ${px} × tickVal/tickSize`;}
+    else{m=MM.marginFutures(vol,sp.marginInitial||1000);f=`${vol} × initial margin/lot`;}
+  }catch(e){m=null;}
+  $("mc-out").innerHTML=m===null?`<div style="color:var(--red);font-size:13px">Could not calculate — check inputs.</div>`
+   :`<div class="kvt"><span class="k">Required margin</span><span class="v num" style="font-size:18px">${money(m)}</span><span class="k">Formula</span><span class="v num" style="font-weight:600">${esc(f)}</span></div>`;
+}
+function docOrdersHTML(){
+  const E=OrbitExecution;
+  const modes=(E.EXECUTION_MODES||[]).map(m=>{const n=String(m.name||m).replace(/_/g," ");
+    return `<tr><td><b>${esc(n)}</b></td><td>${esc(m.description||"")}</td></tr>`;}).join("");
+  const fills=(E.FILL_POLICIES||[]).map(f=>{const n=String(f.name||f).replace(/_/g," ");
+    return `<tr><td><b>${esc(n)}</b></td><td>${esc(f.description||"")}</td></tr>`;}).join("");
+  const comp=E.COMPATIBILITY||{};
+  const compRows=Object.keys(comp).map(k=>{const v=comp[k];
+    const txt=(v&&typeof v==="object")?Object.keys(v).map(k2=>k2+": "+(Array.isArray(v[k2])?v[k2].join(", "):v[k2])).join(" · "):(Array.isArray(v)?v.join(", "):String(v));
+    return `<tr><td><b>${esc(k)}</b></td><td>${esc(txt)}</td></tr>`;}).join("");
+  return `<div class="sec">Execution &amp; fills <span class="r">compatibility</span></div>
+  ${acc("Execution modes",`<table class="dtable"><tbody>${modes||'<tr><td>Instant · Request · Market · Exchange</td></tr>'}</tbody></table>
+  <p style="margin-top:8px">Instant requotes when the price moves; Request holds the price for dealer confirmation; Market fills at the current price (no requote); Exchange routes to the venue book.</p>`)}
+  ${acc("Fill policies",`<table class="dtable"><tbody>${fills||'<tr><td>FOK · IOC · Book-or-Cancel · Return</td></tr>'}</tbody></table>
+  <p style="margin-top:8px"><b>FOK</b> — fill all or kill. <b>IOC</b> — fill what is available, kill the rest. <b>Book-or-Cancel</b> — only as a passive book order. <b>Return</b> — leave the remainder working.</p>`)}
+  ${compRows?acc("Mode × policy compatibility",`<table class="dtable"><thead><tr><th>Mode</th><th>Allowed policies</th></tr></thead><tbody>${compRows}</tbody></table>`):""}
+  ${acc("Pending expirations",`GTC (good till canceled), Day (end of trading day), Specified (exact date/time). Expired orders move to history with state Expired.`)}
+  ${acc("Order dialogs (manager)",`New pending order, modify SL/TP, move-to-history (Canceled), reopen from history. Every modification is audited with the actor (manager, dealer, server, gateway, API).`)}`;
+}
+/* ============ report builder (drag & drop) ============ */
+const RB_METRICS=["Deals","Volume (lots)","Net P/L","Deposits","Withdrawals","Commissions"];
+let rbSel=[];
+function mountReportBuilder(){
+  const sc=document.querySelector("#s-reports .scroll");if(!sc||document.getElementById("rb-card"))return;
+  const d=document.createElement("div");d.id="rb-card";d.className="adv-only";
+  d.innerHTML=`<div class="sec">Report builder <span class="r"><span class="chip info">ADVANCED</span> drag &amp; drop</span></div>
+  <div class="card"><div style="font-size:12.5px;color:var(--text2);margin-bottom:8px">Drag metrics into the canvas, reorder, then generate.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px" id="rb-pal">
+  ${RB_METRICS.map(m=>`<span class="chip info" draggable="true" ondragstart="event.dataTransfer.setData('text','${m}')" style="cursor:grab;padding:8px 12px">+ ${m}</span>`).join("")}</div>
+  <div id="rb-drop" ondragover="event.preventDefault()" ondrop="rbDrop(event)" style="min-height:64px;border:1.5px dashed var(--border2);border-radius:12px;padding:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+  <span style="font-size:12.5px;color:var(--text3)">Drop metrics here…</span></div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn sec" onclick="rbSel=[];rbDraw()">Clear</button><button class="mbtn" onclick="rbGen()">Generate report</button></div>
+  <div id="rb-out" style="margin-top:10px"></div></div>`;
+  sc.appendChild(d);rbDraw();
+}
+function rbDrop(e){e.preventDefault();const m=e.dataTransfer.getData("text");if(m&&RB_METRICS.includes(m)&&!rbSel.includes(m)){rbSel.push(m);rbDraw();}}
+function rbDraw(){
+  const z=document.getElementById("rb-drop");if(!z)return;
+  z.innerHTML=rbSel.length?rbSel.map((m,i)=>`<span class="chip buy" draggable="true" ondragstart="event.dataTransfer.setData('text','${m}');event.dataTransfer.setData('from','${i}')" ondrop="rbMove(event,${i})" ondragover="event.preventDefault()" style="cursor:grab;padding:8px 12px">${i+1}. ${m} <b onclick="rbSel.splice(${i},1);rbDraw()" style="cursor:pointer">×</b></span>`).join(""):`<span style="font-size:12.5px;color:var(--text3)">Drop metrics here…</span>`;
+}
+function rbMove(e,to){e.preventDefault();const m=e.dataTransfer.getData("text");const from=+e.dataTransfer.getData("from");if(isNaN(from))return;rbSel.splice(from,1);rbSel.splice(to,0,m);rbDraw();}
+function rbGen(){
+  const deals=S.deals||[];
+  const vals={"Deals":deals.length,"Volume (lots)":deals.reduce((t,d)=>t+(+d.vol||0),0).toFixed(2),"Net P/L":sgn(deals.reduce((t,d)=>t+(+d.pl||0),0)),
+    "Deposits":money(S.depToday),"Withdrawals":money(S.wdToday),"Commissions":money(S.balanceOps.filter(b=>b.kind==="commission").reduce((t,b)=>t+b.amount,0))};
+  document.getElementById("rb-out").innerHTML=rbSel.length?
+   `<table class="dtable"><thead><tr><th>Metric</th><th class="n">Value (demo)</th></tr></thead><tbody>${rbSel.map(m=>`<tr><td>${esc(m)}</td><td class="n"><b>${vals[m]}</b></td></tr>`).join("")}</tbody></table>`
+   :`<div style="font-size:13px;color:var(--text3)">Add at least one metric.</div>`;
+}
+/* ============ tick hooks ============ */
+(function(){const _ra=renderAll;renderAll=function(){_ra();try{evalMAlerts();}catch(e){}try{mountReportBuilder();}catch(e){}};})();
+document.addEventListener("DOMContentLoaded",function(){try{mountReportBuilder();}catch(e){}});
+</script>
+<script>
+"use strict";
+/* ============ v6.2 gap-fillers: Close-By, LP reports, template manager ============ */
+/* ---- Close-By (hedging): close an opposite pair, saving one spread ---- */
+function acctCloseByPick(login,idA){
+  const p=S.positions.find(x=>x.id===idA);if(!p)return;
+  const opps=S.positions.filter(q=>q.client===login&&q.sym===p.sym&&q.dir!==p.dir&&q.id!==idA);
+  if(!opps.length)return toast("No opposite position","Nothing to close by on "+dname(p.sym));
+  openModal(`<h3>Close by opposite</h3><p>Close <b>${p.dir.toUpperCase()} ${p.vol} ${dname(p.sym)}</b> against:</p>
+  ${opps.map(q=>`<div class="crow" style="margin:0 0 8px;border:1px solid var(--border);border-radius:12px" onclick="acctCloseByDo(${login},${idA},${q.id})">
+    <div><b>${q.dir.toUpperCase()} ${q.vol} ${dname(q.sym)}</b> @ <span class="num">${q.open}</span></div>
+    <div class="cr"><span class="chip ok">SAVE SPREAD</span></div></div>`).join("")}
+  <div class="mrow"><button class="mbtn sec" onclick="closeModal()">Cancel</button></div>`);
+}
+function acctCloseByDo(login,idA,idB){
+  const pa=S.positions.find(p=>p.id===idA);if(!pa)return toast("Gone","Position no longer open");
+  const vol=Math.min(pa.vol,(S.positions.find(p=>p.id===idB)||{vol:0}).vol);
+  if(!(vol>0))return toast("Close-by failed","No volume to close");
+  try{
+    const r=PositionAccounting.closeBy(S.positions.map(p=>({id:p.id,direction:p.dir,volume:p.vol})),idA,idB,vol);
+    r.deals.forEach(d=>{
+      const p=S.positions.find(x=>x.id===d.position_id);if(!p)return;
+      const cut=Math.min(d.volume,p.vol),cl=closeFor(p);
+      S.deals.unshift({t:Date.now(),client:p.client,sym:p.sym,dir:p.dir,vol:cut,open:p.open,close:cl,
+        pl:(plOf(p)||0)*(p.vol?cut/p.vol:0),id:"mgr"+Date.now()+d.position_id,mgr:1,reason:"CloseBy",comment:d.comment});
+      p.vol=+(p.vol-cut).toFixed(2);
+      if(p.vol<=0.001)S.positions=S.positions.filter(x=>x!==p);
+      pushBackSafe(p.client);});
+    audit("manager","Close by",`#${idA} / #${idB} · ${vol} lots`);
+    save();closeModal();renderAll();toast("Closed by opposite",vol+" lots · one spread saved · demo");
+  }catch(e){toast("Close-by failed",e.message);}
+}
+/* position rows with Close-By, injected into the account detail overview */
+function acctPosRows(login){
+  const pos=S.positions.filter(p=>p.client===login);
+  if(!pos.length)return `<div style="font-size:12.5px;color:var(--text3)">No open positions.</div>`;
+  return pos.map(p=>{
+    const hasOpp=pos.some(q=>q!==p&&q.sym===p.sym&&q.dir!==p.dir);
+    const v=plOf(p);
+    return `<div class="prow"><div class="p1"><span class="dir ${p.dir==="buy"?"b":"s"}">${p.dir.toUpperCase()}</span>
+    <span class="ps num">${p.vol} ${dname(p.sym)}</span><span class="pc num">@ ${p.open}</span></div>
+    <div class="p2"><span class="pl num" style="color:${v===null?"inherit":v>=0?"var(--green)":"var(--red)"}">${v===null?"—":sgn(v)}</span>
+    ${hasOpp?`<button class="rbtn" style="padding:6px 12px" onclick="acctCloseByPick(${login},${p.id})">Close by</button>`:`<span style="font-size:11.5px;color:var(--text3)">no opposite</span>`}</div></div>`;}).join("");
+}
+/* ---- LP reports: turnover / imbalance / slippage (demo-attributed fills) ---- */
+function lpReportsHTML(){
+  let sd=1234567;const R=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
+  const deals=(S.deals||[]).slice(0,80).map((d,i)=>({lp_id:i%3===2?"lp-2":"lp-1",volume:+d.vol||0,side:d.dir,
+    expected_price:+d.close||0,executed_price:(+d.close||0)*(1+(R()-0.5)/800)}));
+  const to=OrbitLiquidity.lpTurnover(deals),im=OrbitLiquidity.lpImbalance(deals),sl=OrbitLiquidity.lpSlippage(deals);
+  return `<div class="sec">LP reports <span class="r">demo-attributed fills</span></div>
+  <div class="card" style="padding:4px 0"><div class="sec" style="padding:10px 16px 4px">Turnover by LP</div>
+  <table class="dtable"><thead><tr><th>LP</th><th class="n">Deals</th><th class="n">Volume</th></tr></thead><tbody>
+  ${to.map(r=>`<tr><td>${esc(r.lp_id)}</td><td class="n">${r.deal_count}</td><td class="n">${(+r.turnover_volume).toFixed(2)}</td></tr>`).join("")||`<tr><td colspan="3" style="text-align:center;color:var(--text3)">—</td></tr>`}</tbody></table></div>
+  <div class="card" style="padding:4px 0"><div class="sec" style="padding:10px 16px 4px">LP imbalance</div>
+  <table class="dtable"><thead><tr><th>LP</th><th class="n">Buy</th><th class="n">Sell</th><th class="n">Ratio</th></tr></thead><tbody>
+  ${im.map(r=>`<tr><td>${esc(r.lp_id)}</td><td class="n">${(+r.buy_volume).toFixed(2)}</td><td class="n">${(+r.sell_volume).toFixed(2)}</td><td class="n">${Math.round(r.imbalance_ratio*100)}%</td></tr>`).join("")||`<tr><td colspan="4" style="text-align:center;color:var(--text3)">—</td></tr>`}</tbody></table></div>
+  <div class="card" style="padding:4px 0"><div class="sec" style="padding:10px 16px 4px">LP slippage</div>
+  <table class="dtable"><thead><tr><th>LP</th><th class="n">Fills</th><th class="n">Mean</th><th class="n">Worst</th></tr></thead><tbody>
+  ${sl.map(r=>`<tr><td>${esc(r.lp_id)}</td><td class="n">${r.count}</td><td class="n">${(+r.mean_slippage).toFixed(5)}</td><td class="n">${(+r.max_slippage).toFixed(5)}</td></tr>`).join("")||`<tr><td colspan="4" style="text-align:center;color:var(--text3)">—</td></tr>`}</tbody></table></div>`;
+}
+/* ---- mailbox templates manager (mounted into Broadcast tab) ---- */
+const MACROS=["#LOGIN#","#USER_BALANCE#","#USER_EQUITY#","#USER_MARGIN#","#USER_MARGIN_FREE#","#USER_MARGIN_LEVEL#","#DATE#","#TIME#","#DATETIME#"];
+function mountTplManager(){
+  const sc=document.querySelector("#s-broadcast .scroll");if(!sc||document.getElementById("tpl-card"))return;
+  const d=document.createElement("div");d.id="tpl-card";
+  d.innerHTML=`<div class="sec">Message templates <span class="r">macros</span></div><div id="tpl-list"></div>
+  <div class="card"><div style="font-weight:800;margin-bottom:8px">New template</div>
+  <div class="kvt" style="grid-template-columns:1fr 1fr">
+  <span class="k">Name</span><input class="ainput" id="tp-name" placeholder="Margin call">
+  <span class="k">Channel</span><select class="asel" id="tp-ch"><option value="mail">mail</option><option value="push">push</option><option value="sms">sms</option></select>
+  <span class="k">Subject</span><input class="ainput" id="tp-subj" placeholder="Subject (mail)"></div>
+  <textarea class="ainput" id="tp-body" style="margin-top:10px" placeholder="Body — click a macro to insert"></textarea>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${MACROS.map(m=>`<button class="chip dim" style="cursor:pointer;border:none" onclick="tplMacro('${m}')">${m}</button>`).join("")}</div>
+  <div class="mrow2" style="margin:12px 0 0"><button class="mbtn" onclick="tplAdd()">Save template</button></div></div>`;
+  sc.appendChild(d);tplDraw();
+}
+function tplMacro(m){const t=$("tp-body");t.value+=(t.value&&!t.value.endsWith(" ")?" ":"")+m+" ";t.focus();}
+function tplAdd(){
+  const name=($("tp-name").value||"").trim(),body=$("tp-body").value||"";
+  if(!name||!body)return toast("Name and body required","");
+  S.templates.push({id:"t"+Date.now(),name,channel:$("tp-ch").value,subject:$("tp-subj").value||"",body});
+  audit("manager","Template added",name);save();tplDraw();toast("Template saved",name);
+}
+function tplDraw(){
+  const el=document.getElementById("tpl-list");if(!el)return;
+  el.innerHTML=(S.templates||[]).map(t=>{const c=cli(S.clients[0]?S.clients[0].login:0)||{login:0,balance:0};
+    const prev=OrbitMailbox.renderTemplate(t.body,{login:700101,balance:12500.5,equity:13100,margin:900,margin_level:1455});
+    return `<div class="card"><div style="display:flex;gap:10px;align-items:center">
+    <span class="chip info">${esc(t.channel||"mail")}</span><div><b>${esc(t.name)}</b>
+    <div style="font-size:12px;color:var(--text3);white-space:pre-wrap">${esc(prev.slice(0,120))}${prev.length>120?"…":""}</div></div>
+    <div style="margin-left:auto;display:flex;gap:6px"><button class="rbtn" onclick="tplUse('${t.id}')">Use</button><button class="rbtn no" onclick="tplDel('${t.id}')">Delete</button></div></div></div>`;}).join("");
+}
+function tplDel(id){S.templates=S.templates.filter(t=>t.id!==id);save();tplDraw();}
+function tplUse(id){const t=(S.templates||[]).find(x=>x.id===id);if(!t)return;
+  const b=document.getElementById("bc-body");if(b){b.value=t.body;b.focus();toast("Template loaded","Edit and send from Broadcast");}
+  else toast("Template",t.name);}
+(function(){const _ra=renderAll;renderAll=function(){_ra();try{mountTplManager();}catch(e){}};})();
+document.addEventListener("DOMContentLoaded",function(){try{mountTplManager();}catch(e){}});
+</script>
+
 </body>
 </html>
