@@ -2611,19 +2611,12 @@ window.addEventListener("orientationchange",()=>{setTimeout(fitOrient,300);});
 function drawer(open){$("drawer").classList.toggle("on",open);$("drawer-scrim").classList.toggle("on",open);if(open)renderDrawer();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("drawer").classList.contains("on"))drawer(false);else if($("sheet").classList.contains("open"))sheetClose();}});
 const DRAWER=[["Quotes",'<path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>',"quotes"],
- ["Charts",'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',"chart"],
- ["Trade",'<path d="M3 17l6-6 4 4 8-8"/>',"trade"],
- ["Contests",'<path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 01-10 0V4z"/><path d="M7 6H4a1 1 0 00-1 1c0 2.5 2 4 4 4M17 6h3a1 1 0 011 1c0 2.5-2 4-4 4"/>',"contests"],
- ["History",'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>',"history"],
- ["Messages",'<path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.5 0-3-.4-4.2-1L3 20l1.1-5.3A8.5 8.5 0 1121 11.5z"/>',"messages"],
- ["Account",'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',"account"],
- ["Price alerts",'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',"alerts"],
- ["AI Assistant",'<circle cx="12" cy="12" r="3.2"/><path d="M12 2v3m0 12v3M2 12h3m12 0h3M4.9 4.9l2.1 2.1m8.9 8.9l2.1 2.1m0-12.8l-2.1 2.1M7 17l-2.1 2.1"/>',"ai"],
- ["Analytics",'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',"analytics"],
- ["Portfolio",'<path d="M21.2 15.9A10 10 0 118 2.8"/><path d="M22 12A10 10 0 0012 2v10z"/>',"portfolio"],
- ["Strategy tester",'<path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4"/>',"tester"],
- ["Settings & more",'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',"settings"],
- ["Toggle theme",'<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',"theme"]];
+["Charts",'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',"chart"],
+["Trade",'<path d="M3 17l6-6 4 4 8-8"/>',"trade"],
+["History",'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>',"history"],
+["Messages",'<path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.5 0-3-.4-4.2-1L3 20l1.1-5.3A8.5 8.5 0 1121 11.5z"/>',"messages"],
+["Account",'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',"account"],
+["Settings & more",'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',"settings"]];
 /* ================= DUAL UI MODES · 2026-10-05 ================= */
 function setUiMode(m,quiet){S.uiMode=(m==="classic")?"classic":"advanced";save();applyUiMode();
  if(!quiet)toast(S.uiMode==="classic"?"Classic interface":"Advanced interface");
@@ -2638,16 +2631,8 @@ function applyUiMode(){var c=S.uiMode==="classic";
 var CENTER_SCREENS=["history","messages","more","account","settings","calendar","signals","algo","guide","ai","analytics","portfolio","tester"];
 function fitDesk(){try{document.body.classList.toggle("desk-center",window.innerWidth>=1024&&CENTER_SCREENS.indexOf(S.tab)>=0);}catch(e){}}
 /* classic drawer rows — ref 01 information architecture, own OrbitTrader icons */
-var DRAWER_C=[
- ["Trade",'<path d="M3 17l6-6 4 4 8-8"/>',"trade"],
- ["News",'<path d="M4 6h16M4 10h16M4 14h10M20 18h-4m2-2v4"/><rect x="2" y="3" width="20" height="18" rx="2"/>',"news"],
- ["Mailbox",'<path d="M3 8l7.9 5.3a2 2 0 002.2 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',"mailbox"],
- ["Journal",'<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3V4z"/><path d="M5 17a3 3 0 013-3h11M9 8h6"/>',"journal"],
- ["Settings",'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.2a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.2a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.2a1.7 1.7 0 001 1.5h.1a1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9v.1a1.7 1.7 0 001.5 1h.2a2 2 0 110 4h-.2a1.7 1.7 0 00-1.5 1z"/>',"settings"],
- ["Economic calendar",'<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',"calendar"],
- ["Traders Community",'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',"signals"],
- ["Algo Trading",'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v2m6-2v2M9 20v2m6-2v2M2 9h2m-2 6h2M20 9h2m-2 6h2M9 12h6"/>',"algo"],
- ["User guide",'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3m.1 4h.01"/>',"guide"]];
+var DRAWER_C=[["Trade",'<path d="M3 17l6-6 4 4 8-8"/>',"trade"],
+["Settings",'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.2a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.2a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.2a1.7 1.7 0 001 1.5h.1a1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9v.1a1.7 1.7 0 001.5 1h.2a2 2 0 110 4h-.2a1.7 1.7 0 00-1.5 1z"/>',"settings"]];
 function renderDrawer(){const an=S.alerts.filter(a=>!a.fired).length,mn=unreadMail();
  $("drawer-items").innerHTML=DRAWER.map(d=>{let bdg="";
   if(d[2]==="alerts"&&an)bdg=`<span class="nbadge">${an}</span>`;
