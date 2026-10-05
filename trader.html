@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>OrbitTrader 5.9</title>
+<title>OrbitTrader 6.0</title>
 <style>
 /* ============ THEME TOKENS — every color flows through these ============ */
 :root, [data-theme="dark"]{
@@ -1428,7 +1428,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
 .empty{padding:40px 24px;text-align:center;color:var(--text2);font-size:13.5px;line-height:1.65}
 
 /* ---------- screen-specific fixes (from screenshot audit) ---------- */
-/* quotes header: fit full "OrbitTrader 5.1" on 390px */
+/* quotes header: fit full "OrbitTrader 6.0" on 390px */
 @media (max-width:560px){
   .appbar.rx-qhead{gap:2px;padding-left:8px;padding-right:8px}
   .appbar.rx-qhead .iconbtn{width:40px;height:40px;flex:none}
@@ -1441,7 +1441,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
 </style>
 </head>
 <body>
-<div class="stage-note"><b>OrbitTrader 5.9</b> · live market data · paper trading</div>
+<div class="stage-note"><b>OrbitTrader 6.0</b> · live market data · paper trading</div>
 <div class="phone" id="phone">
   <div id="inv-banner">View-only investor mode — trading disabled</div>
 
@@ -1727,7 +1727,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
           <div class="mrow" onclick="sheetClose();b2_ntfCenter()"><span class="mico mi-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><span class="mtit"><b>Notifications</b><small>Center &amp; alert preferences</small></span><span class="mchev">›</span></div>
           <div class="msec">App</div>
       <div class="mrow" onclick="sheetAbout()"><span class="mico mi-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span><span class="mtit"><b>Data sources &amp; disclosures</b><small>Where prices come from</small></span><span class="mchev">›</span></div>
-      <div class="mrow"><span class="mico mi-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span><span class="mtit"><b>Version</b><small>5.9 · paper trading</small></span></div>
+      <div class="mrow"><span class="mico mi-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span><span class="mtit"><b>Version</b><small>6.0 · paper trading</small></span></div>
       <div style="height:30px"></div>
     </div>
   </div>
@@ -3810,7 +3810,7 @@ function sheetStatement(){const ds=S.deals||[];
 function printStatement(){const ds=[...(S.deals||[])].reverse();
  const rows=ds.map(d=>{const dg=SPECS[d.sym]?SPECS[d.sym].digits:2;
   return `<tr><td>${fmtTime(d.time)}</td><td>${DISP(d.sym)}</td><td>${d.dir.toUpperCase()}</td><td>${d.vol}</td><td>${Number(d.open).toFixed(dg)}</td><td>${Number(d.close).toFixed(dg)}</td><td>${d.pl>=0?"+":"\u2212"}${Math.abs(d.pl).toFixed(2)}</td><td>${esc(dealReason(d.reason))}</td></tr>`;}).join("");
- $("print-area").innerHTML=`<h1>OrbitTrader 5.9 \u2014 Account Statement</h1>
+ $("print-area").innerHTML=`<h1>OrbitTrader 6.0 \u2014 Account Statement</h1>
  <p>Account ${S.acctId} \u00B7 ${esc(S.acctLabel||"")} \u00B7 generated ${new Date().toLocaleString()} \u00B7 paper trading, no real money</p>
  <h2>Summary</h2><p>Closed deals: ${ds.length} \u00B7 Net P/L: $${ds.reduce((a,d)=>a+d.pl,0).toFixed(2)} \u00B7 Balance: $${S.balance.toFixed(2)}</p>
  <h2>Closed deals</h2><table><tr><th>Close time</th><th>Symbol</th><th>Dir</th><th>Lots</th><th>Open</th><th>Close</th><th>P/L $</th><th>Reason</th></tr>${rows||'<tr><td colspan="8">No deals yet</td></tr>'}</table>`;
@@ -3972,7 +3972,7 @@ function sheetAbout(){sheetOpen("Data sources & disclosures",`
  <div class="kv"><span class="k">XAUUSD · XAGUSD</span><span class="v" style="font-size:13px">Swissquote spot<br><small>live bank quotes, never a proxy</small></span></div>
  <div class="kv"><span class="k">Execution</span><span class="v" style="font-size:13px">Paper trading<br><small>no real money moves</small></span></div>
  <div class="kv"><span class="k">Charting</span><span class="v" style="font-size:13px">Charting by <a href="https://www.tradingview.com/" target="_blank" rel="noopener" style="color:var(--buy)">TradingView</a><br><small>Lightweight Charts&trade;</small></span></div>
- <p style="color:var(--text3);font-size:12.5px;margin-top:14px;line-height:1.7">OrbitTrader 5.9 v2.0 demo. Prices are real market data with honest LIVE / DAILY / CLOSED / OFFLINE badges — never simulated. Trading is simulated paper trading for evaluation only. Not investment advice.</p>`);}
+ <p style="color:var(--text3);font-size:12.5px;margin-top:14px;line-height:1.7">OrbitTrader 6.0 v2.0 demo. Prices are real market data with honest LIVE / DAILY / CLOSED / OFFLINE badges — never simulated. Trading is simulated paper trading for evaluation only. Not investment advice.</p>`);}
 
 
 /* ================= BATCH 3 — final polish ================= */
@@ -4631,7 +4631,7 @@ function sheetJournal(){const rows=S.journal.length?S.journal.map(j=>{const dt=n
 /* mailbox — admin broadcasts (orbit-mailbox) + local system messages */
 function getBroadcasts(){try{const a=JSON.parse(localStorage.getItem("orbit-mailbox")||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
 function seedSysmail(){if(S.sysmail.length)return;
- S.sysmail.unshift({id:"w0",from:"OrbitTrader 5.1 Team",title:"Welcome to OrbitTrader 5.1",body:"Real market prices, paper trading — no real money at risk. Tap the pencil icon on the chart for drawing tools, fx for indicators, and the gear for chart settings.",ts:Date.now(),read:false});save();}
+ S.sysmail.unshift({id:"w0",from:"OrbitTrader 6.0 Team",title:"Welcome to OrbitTrader 6.0",body:"Real market prices, paper trading — no real money at risk. Tap the pencil icon on the chart for drawing tools, fx for indicators, and the gear for chart settings.",ts:Date.now(),read:false});save();}
 function unreadMail(){return getBroadcasts().filter(m=>!S.mailRead.includes(String(m.id))).length+S.sysmail.filter(m=>!m.read).length;}
 function renderMailPill(){const p=$("mail-pill");const n=unreadMail();
  if(p){p.style.display=n?"inline-flex":"none";p.textContent=n;}
@@ -4703,7 +4703,7 @@ function calEmpty(){const el=$("cal-list");if(!el)return;
 
 /* white-label brand from the admin app */
 function applyBrand(){let b=null;try{b=JSON.parse(localStorage.getItem("orbit-brand")||"null");}catch(e){}
- if(!b||!b.name)return;const name=String(b.name).trim()||"OrbitTrader 5.1";
+ if(!b||!b.name)return;const name=String(b.name).trim()||"OrbitTrader 6.0";
  document.documentElement.style.setProperty("--brand",b.color||"#2F80FF");
  document.title=name+" · Trader";
  const wm=brandWordmark(name);
@@ -5224,7 +5224,7 @@ function b2_printMonthly(){
   +`<td>${Number(d.open).toFixed(dg)}</td><td>${Number(d.close).toFixed(dg)}</td>`
   +`<td>${(d.pl||0)>=0?"+":"−"}${Math.abs(d.pl||0).toFixed(2)}</td><td>${esc(dealReason(d.reason))}</td></tr>`;}).join("");
  var pl=rows.reduce(function(a,d){return a+(d.pl||0)+(d.swap||0);},0);
- $("print-area").innerHTML=`<h1>OrbitTrader 5.1 — Monthly Trading Report</h1>`
+ $("print-area").innerHTML=`<h1>OrbitTrader 6.0 — Monthly Trading Report</h1>`
  +`<p>Account ${esc(S.acctId)} · ${esc(S.acctLabel||"")} · generated ${new Date().toLocaleString()} · paper trading, no real money</p>`
  +`<table><tr><th>Closed</th><th>Symbol</th><th>Side</th><th>Lots</th><th>Open</th><th>Close</th><th>P/L</th><th>Reason</th></tr>${body}</table>`
  +`<p><b>Total net P/L: ${pl>=0?"+":"−"}$${Math.abs(pl).toFixed(2)}</b> · ${rows.length} closed deals</p>`;

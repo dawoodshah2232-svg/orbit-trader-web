@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OrbitTrader 5.8 — Suite</title>
+<title>OrbitTrader 6.0 — Suite</title>
 <style>
 :root{--bg:#000;--surface:#0B0B0F;--surface2:#131319;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);--text:#F5F5F7;--text2:#9A9AA3;--text3:#5C5C66;--blue:#2F80FF;--blue-dim:rgba(47,128,255,.14);--red:#F23645;--green:#2EBD85;--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -47,7 +47,7 @@ h1 span{color:var(--blue)}
 <script>
 (function(){try{
   var b=JSON.parse(localStorage.getItem("orbit-brand")||"null");if(!b||typeof b!=="object")return;
-  if(b.name){var s=document.querySelector(".sub");if(s)s.textContent="Trade the universe · "+b.name;document.title=b.name+" · OrbitTrader 5.8";}
+  if(b.name){var s=document.querySelector(".sub");if(s)s.textContent="Trade the universe · "+b.name;document.title=b.name+" · OrbitTrader 6.0";}
   if(b.color){var c=b.color,hs=document.querySelector("h1 span");if(hs)hs.style.color=c;
     var ic=document.querySelector(".card .ic");if(ic){ic.style.background=c+"22";var svg=ic.querySelector("svg");if(svg)svg.style.stroke=c;}
     var mk=document.querySelector(".mark");if(mk)mk.style.filter="drop-shadow(0 12px 40px "+c+"59)";}
